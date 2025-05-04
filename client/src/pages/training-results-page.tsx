@@ -240,10 +240,13 @@ export default function TrainingResultsPage() {
       result.id.toLowerCase().includes(searchQuery.toLowerCase());
     
     // Apply employment status filter if selected
-    const matchesEmployment = !filterEmployment || result.employmentStatus === filterEmployment;
+    const matchesEmployment = !filterEmployment || 
+      filterEmployment === "all_statuses" || 
+      result.employmentStatus === filterEmployment;
     
     // Apply certificate filter if selected
     const matchesCertificate = !filterCertificate || 
+      filterCertificate === "all_certificates" ||
       (filterCertificate === "issued" && result.certificateIssued) ||
       (filterCertificate === "pending" && !result.certificateIssued);
     
@@ -312,7 +315,7 @@ export default function TrainingResultsPage() {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all_statuses">All Statuses</SelectItem>
                   <SelectItem value="Employed">Employed</SelectItem>
                   <SelectItem value="Unemployed">Unemployed</SelectItem>
                   <SelectItem value="Referred">Referred</SelectItem>
@@ -330,7 +333,7 @@ export default function TrainingResultsPage() {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Certificates</SelectItem>
+                  <SelectItem value="all_certificates">All Certificates</SelectItem>
                   <SelectItem value="issued">Issued</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                 </SelectContent>

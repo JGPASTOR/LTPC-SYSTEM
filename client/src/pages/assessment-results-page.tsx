@@ -186,10 +186,14 @@ export default function AssessmentResultsPage() {
       assessment.id.toLowerCase().includes(searchQuery.toLowerCase());
     
     // Apply type filter if selected
-    const matchesType = !filterType || assessment.assessmentType === filterType;
+    const matchesType = !filterType || 
+      filterType === "all_types" || 
+      assessment.assessmentType === filterType;
     
     // Apply result filter if selected
-    const matchesResult = !filterResult || assessment.result === filterResult;
+    const matchesResult = !filterResult || 
+      filterResult === "all_results" || 
+      assessment.result === filterResult;
     
     return matchesSearch && matchesType && matchesResult;
   });
@@ -261,7 +265,7 @@ export default function AssessmentResultsPage() {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all_types">All Types</SelectItem>
                   <SelectItem value="Written">Written</SelectItem>
                   <SelectItem value="Practical">Practical</SelectItem>
                   <SelectItem value="Project">Project</SelectItem>
@@ -277,7 +281,7 @@ export default function AssessmentResultsPage() {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Results</SelectItem>
+                  <SelectItem value="all_results">All Results</SelectItem>
                   <SelectItem value="Pass">Pass</SelectItem>
                   <SelectItem value="Fail">Fail</SelectItem>
                   <SelectItem value="Pending">Pending</SelectItem>

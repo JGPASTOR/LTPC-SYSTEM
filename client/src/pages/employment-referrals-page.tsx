@@ -98,7 +98,7 @@ const sampleReferrals: EmploymentReferral[] = [
     completionDate: "2025-04-01",
     employer: "City Bakery",
     position: "Food Processor",
-    status: "Pending"
+    status: "Endorsed"
   },
   {
     id: "er4",
@@ -107,8 +107,8 @@ const sampleReferrals: EmploymentReferral[] = [
     completionDate: "2025-03-15",
     employer: "TechSolutions Inc.",
     position: "Computer Technician",
-    status: "Not Qualified",
-    notes: "Needs additional training in networking before reapplying."
+    status: "Endorsed",
+    notes: "Awaiting confirmation from employer."
   },
   {
     id: "er5",
@@ -117,7 +117,7 @@ const sampleReferrals: EmploymentReferral[] = [
     completionDate: "2025-04-05",
     employer: "Fashion Forward",
     position: "Assistant Tailor",
-    status: "Endorsed",
+    status: "Hired",
     contactDetails: "09789456123"
   }
 ];
@@ -138,21 +138,24 @@ type ReferralFormValues = z.infer<typeof referralSchema>;
 
 // Status badge component
 const StatusBadge = ({ status }: { status: EmploymentReferral["status"] }) => {
-  const getVariant = () => {
-    switch (status) {
-      case "Hired": return "success";
-      case "Endorsed": return "outline";
-      case "Pending": return "secondary";
-      case "Not Qualified": return "destructive";
-      default: return "outline";
-    }
-  };
-  
-  return (
-    <Badge variant={getVariant() as any}>
-      {status}
-    </Badge>
-  );
+  switch (status) {
+    case "Hired":
+      return (
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 flex items-center gap-1">
+          <Briefcase className="h-3 w-3" />
+          <span>Hired</span>
+        </Badge>
+      );
+    case "Endorsed":
+      return (
+        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 flex items-center gap-1">
+          <FileCheck className="h-3 w-3" />
+          <span>Endorsed</span>
+        </Badge>
+      );
+    default:
+      return <Badge variant="outline">{status}</Badge>;
+  }
 };
 
 export default function EmploymentReferralsPage() {
@@ -188,7 +191,7 @@ export default function EmploymentReferralsPage() {
       completionDate: new Date().toISOString().split('T')[0],
       employer: "",
       position: "",
-      status: "Pending",
+      status: "Endorsed",
       contactDetails: "",
       notes: ""
     }
@@ -450,8 +453,6 @@ export default function EmploymentReferralsPage() {
                           <SelectContent>
                             <SelectItem value="Endorsed">Endorsed</SelectItem>
                             <SelectItem value="Hired">Hired</SelectItem>
-                            <SelectItem value="Pending">Pending</SelectItem>
-                            <SelectItem value="Not Qualified">Not Qualified</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -597,29 +598,19 @@ export default function EmploymentReferralsPage() {
                         variant={selectedReferral.status === "Endorsed" ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleUpdateStatus("Endorsed")}
+                        className="flex items-center gap-2"
                       >
+                        <FileCheck className="h-4 w-4" />
                         Endorsed
                       </Button>
                       <Button
                         variant={selectedReferral.status === "Hired" ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleUpdateStatus("Hired")}
+                        className="flex items-center gap-2"
                       >
+                        <Briefcase className="h-4 w-4" />
                         Hired
-                      </Button>
-                      <Button
-                        variant={selectedReferral.status === "Pending" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleUpdateStatus("Pending")}
-                      >
-                        Pending
-                      </Button>
-                      <Button
-                        variant={selectedReferral.status === "Not Qualified" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleUpdateStatus("Not Qualified")}
-                      >
-                        Not Qualified
                       </Button>
                     </div>
                   </div>

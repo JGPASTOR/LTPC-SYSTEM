@@ -434,13 +434,13 @@ export default function TraineesPage() {
                   <TableBody>
                     {isLoading ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-6">
+                        <TableCell colSpan={8} className="text-center py-6">
                           Loading trainees...
                         </TableCell>
                       </TableRow>
                     ) : filteredTrainees?.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-6">
+                        <TableCell colSpan={8} className="text-center py-6">
                           No trainees found. Try a different search term.
                         </TableCell>
                       </TableRow>
@@ -457,6 +457,13 @@ export default function TraineesPage() {
                             </div>
                           </TableCell>
                           <TableCell>{trainee.course}</TableCell>
+                          <TableCell>
+                            {trainee.trainerName ? (
+                              <span className="text-sm font-medium">{trainee.trainerName}</span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Not assigned</span>
+                            )}
+                          </TableCell>
                           <TableCell>{new Date(trainee.enrollmentDate).toLocaleDateString()}</TableCell>
                           <TableCell>{getStatusBadge(trainee.status)}</TableCell>
                           <TableCell>{getPaymentBadge(trainee.payment)}</TableCell>

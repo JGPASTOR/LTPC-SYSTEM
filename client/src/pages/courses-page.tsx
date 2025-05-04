@@ -19,6 +19,17 @@ import { Edit, Plus, Search, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
+
+// Define trainer interface for selection in course assignment
+interface Trainer {
+  id: string;
+  name: string;
+  expertise: string;
+}
 
 // Define course interface
 interface Course {
@@ -28,6 +39,7 @@ interface Course {
   duration: string;
   status: "Active" | "Inactive";
   enrollmentCount: number;
+  trainers?: Trainer[];  // Array of assigned trainers
 }
 
 // Sample courses data
@@ -82,6 +94,16 @@ const sampleCourses: Course[] = [
   }
 ];
 
+// Sample trainers for dropdown
+const sampleAvailableTrainers: Trainer[] = [
+  { id: "TR001", name: "Maria Reyes", expertise: "Web Development" },
+  { id: "TR002", name: "Pedro Santos", expertise: "Culinary Arts" },
+  { id: "TR003", name: "Lisa Garcia", expertise: "Dressmaking" },
+  { id: "TR004", name: "Manuel Tan", expertise: "Electrical Installation" },
+  { id: "TR005", name: "Ana Lim", expertise: "Baking & Pastry Arts" },
+  { id: "TR006", name: "Roberto Aquino", expertise: "Computer Servicing" }
+];
+
 export default function CoursesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,13 +111,20 @@ export default function CoursesPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const { toast } = useToast();
+  
+  // Selected trainers for new course
+  const [selectedTrainers, setSelectedTrainers] = useState<Trainer[]>([]);
+  
+  // Selected trainers for edit course
+  const [editSelectedTrainers, setEditSelectedTrainers] = useState<Trainer[]>([]);
 
   // Form state for new course
   const [newCourse, setNewCourse] = useState({
     name: "",
     description: "",
     duration: "",
-    status: "Active" as Course["status"]
+    status: "Active" as Course["status"],
+    trainers: [] as Trainer[]
   });
 
   // Form state for edit course
@@ -104,7 +133,8 @@ export default function CoursesPage() {
     name: "",
     description: "",
     duration: "",
-    status: "Active" as Course["status"]
+    status: "Active" as Course["status"],
+    trainers: [] as Trainer[]
   });
 
   // Fetch courses
@@ -121,40 +151,122 @@ export default function CoursesPage() {
       course.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Handle trainer selection for new course
+  const handleTrainerSelect = (trainerId: string, isSelected: boolean) => {
+    if (isSelected) {
+      // Add trainer to the selected list
+      const trainerToAdd = sampleAvailableTrainers.find(t => t.id === trainerId);
+      if (trainerToAdd) {
+        setSelectedTrainers([...selectedTrainers, trainerToAdd]);
+        setNewCourse({
+          ...newCourse,
+          trainers: [...selectedTrainers, trainerToAdd]
+        });
+      }
+    } else {
+      // Remove trainer from the selected list
+      const updatedTrainers = selectedTrainers.filter(t => t.id !== trainerId);
+      setSelectedTrainers(updatedTrainers);
+      setNewCourse({
+        ...newCourse,
+        trainers: updatedTrainers
+      });
+    }
+  };
+  
+  // Handle trainer selection for edit course
+  const handleEditTrainerSelect = (trainerId: string, isSelected: boolean) => {
+    if (isSelected) {
+      // Add trainer to the selected list
+      const trainerToAdd = sampleAvailableTrainers.find(t => t.id === trainerId);
+      if (trainerToAdd) {
+        setEditSelectedTrainers([...editSelectedTrainers, trainerToAdd]);
+        setEditCourse({
+          ...editCourse,
+          trainers: [...editSelectedTrainers, trainerToAdd]
+        });
+      }
+    } else {
+      // Remove trainer from the selected list
+      const updatedTrainers = editSelectedTrainers.filter(t => t.id !== trainerId);
+      setEditSelectedTrainers(updatedTrainers);
+      setEditCourse({
+        ...editCourse,
+        trainers: updatedTrainers
+      });
+    }
+  };
+
   // Handle creating a new course
   const handleCreateCourse = () => {
+    // Create the course with the selected trainers
+    const courseWithTrainers = {
+      ...newCourse,
+      trainers: selectedTrainers
+    };
+    
     toast({
       title: "Course Created",
-      description: `Course "${newCourse.name}" has been created successfully.`,
+      description: `Course "${newCourse.name}" has been created successfully with ${selectedTrainers.length} assigned trainers.`,
     });
+    
     setIsAddDialogOpen(false);
+    // Reset the form
     setNewCourse({
       name: "",
       description: "",
       duration: "",
-      status: "Active"
+      status: "Active" as Course["status"],
+      trainers: []
     });
+    setSelectedTrainers([]);
   };
 
   // Handle editing a course
   const handleEditCourse = () => {
+    // Update the course with the selected trainers
+    const updatedCourse = {
+      ...editCourse,
+      trainers: editSelectedTrainers
+    };
+    
     toast({
       title: "Course Updated",
-      description: `Course "${editCourse.name}" has been updated successfully.`,
+      description: `Course "${editCourse.name}" has been updated successfully with ${editSelectedTrainers.length} assigned trainers.`,
     });
+    
     setIsEditDialogOpen(false);
+    setEditSelectedTrainers([]);
+  };
+
+  // Helper function to get initials
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase();
   };
 
   // Handle opening edit dialog
   const openEditDialog = (course: Course) => {
     setSelectedCourse(course);
+    // Set the trainers if they exist in the course
+    if (course.trainers && course.trainers.length > 0) {
+      setEditSelectedTrainers(course.trainers);
+    } else {
+      setEditSelectedTrainers([]);
+    }
+    
     setEditCourse({
       id: course.id,
       name: course.name,
       description: course.description,
       duration: course.duration,
-      status: course.status
+      status: course.status,
+      trainers: course.trainers || []
     });
+    
     setIsEditDialogOpen(true);
   };
 
@@ -220,6 +332,41 @@ export default function CoursesPage() {
                       onChange={(e) => setNewCourse({ ...newCourse, duration: e.target.value })}
                       placeholder="e.g. 8 weeks"
                     />
+                  </div>
+                  
+                  <Separator className="my-2" />
+                  
+                  <div className="grid gap-2">
+                    <Label>Assign Trainers</Label>
+                    <div className="max-h-60 overflow-y-auto border rounded-md p-3 grid gap-2">
+                      {sampleAvailableTrainers.map((trainer) => (
+                        <div key={trainer.id} className="flex items-center gap-3 py-1">
+                          <Checkbox 
+                            id={`trainer-${trainer.id}`}
+                            checked={selectedTrainers.some(t => t.id === trainer.id)}
+                            onCheckedChange={(checked) => handleTrainerSelect(trainer.id, !!checked)}
+                          />
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8 bg-primary text-white">
+                              <AvatarFallback>{getInitials(trainer.name)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <Label className="text-sm font-medium" htmlFor={`trainer-${trainer.id}`}>
+                                {trainer.name}
+                              </Label>
+                              <p className="text-xs text-muted-foreground">
+                                {trainer.expertise}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {selectedTrainers.length > 0 
+                        ? `${selectedTrainers.length} trainer${selectedTrainers.length > 1 ? 's' : ''} selected` 
+                        : 'No trainers selected'}
+                    </div>
                   </div>
                 </div>
                 <DialogFooter>
@@ -369,6 +516,41 @@ export default function CoursesPage() {
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
+            </div>
+            
+            <Separator className="my-2" />
+            
+            <div className="grid gap-2">
+              <Label>Assigned Trainers</Label>
+              <div className="max-h-60 overflow-y-auto border rounded-md p-3 grid gap-2">
+                {sampleAvailableTrainers.map((trainer) => (
+                  <div key={trainer.id} className="flex items-center gap-3 py-1">
+                    <Checkbox 
+                      id={`edit-trainer-${trainer.id}`}
+                      checked={editSelectedTrainers.some(t => t.id === trainer.id)}
+                      onCheckedChange={(checked) => handleEditTrainerSelect(trainer.id, !!checked)}
+                    />
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8 bg-primary text-white">
+                        <AvatarFallback>{getInitials(trainer.name)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <Label className="text-sm font-medium" htmlFor={`edit-trainer-${trainer.id}`}>
+                          {trainer.name}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {trainer.expertise}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {editSelectedTrainers.length > 0 
+                  ? `${editSelectedTrainers.length} trainer${editSelectedTrainers.length > 1 ? 's' : ''} assigned` 
+                  : 'No trainers assigned'}
+              </div>
             </div>
           </div>
           <DialogFooter>

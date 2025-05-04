@@ -13,6 +13,9 @@ import TraineesPage from "@/pages/trainees-page";
 import TrainersPage from "@/pages/trainers-page";
 import PaymentsPage from "@/pages/payments-page";
 import ReportsPage from "@/pages/reports-page";
+import EmploymentReferralsPage from "@/pages/employment-referrals-page";
+import AssessmentResultsPage from "@/pages/assessment-results-page";
+import TrainingResultsPage from "@/pages/training-results-page";
 
 function Router() {
   return (
@@ -24,6 +27,9 @@ function Router() {
       <ProtectedRoute path="/trainers" component={TrainersPage} />
       <ProtectedRoute path="/payments" component={PaymentsPage} />
       <ProtectedRoute path="/reports" component={ReportsPage} />
+      <ProtectedRoute path="/employment-referrals" component={EmploymentReferralsPage} />
+      <ProtectedRoute path="/assessment-results" component={AssessmentResultsPage} />
+      <ProtectedRoute path="/training-results" component={TrainingResultsPage} />
       <Route component={NotFound} />
     </Switch>
   );

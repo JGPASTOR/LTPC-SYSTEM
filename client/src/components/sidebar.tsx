@@ -9,7 +9,10 @@ import {
   FileText, 
   User, 
   Settings, 
-  LogOut
+  LogOut,
+  Award,
+  Briefcase,
+  ClipboardCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -76,6 +79,11 @@ export function Sidebar() {
             <NavItem href="/trainees" icon={Users}>Trainees</NavItem>
             <NavItem href="/trainers" icon={GraduationCap}>Trainers</NavItem>
             <NavItem href="/payments" icon={Wallet}>Payments</NavItem>
+            
+            <p className="text-xs uppercase text-gray-400 pl-3 mb-2 mt-6">Training Management</p>
+            <NavItem href="/assessment-results" icon={ClipboardCheck}>Assessment Results</NavItem>
+            <NavItem href="/training-results" icon={Award}>Training Results</NavItem>
+            <NavItem href="/employment-referrals" icon={Briefcase}>Employment Referrals</NavItem>
             <NavItem href="/reports" icon={FileText}>Reports</NavItem>
             
             <p className="text-xs uppercase text-gray-400 pl-3 mb-2 mt-6">Administration</p>

@@ -235,21 +235,12 @@ export function AdminPesdoDashboard() {
       </div>
 
       {/* Training Progress and Assessment Results */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TrainingProgress courses={getTrainingProgressData()} />
         <AssessmentResults 
           results={getAssessmentResultsData()} 
           onView={handleViewAssessment} 
           onDownload={handleDownloadAssessment}
-        />
-      </div>
-
-      {/* Employment Referrals */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <EmploymentReferrals 
-          referrals={getEmploymentReferralsData()} 
-          onView={handleViewReferral}
-          onEndorse={handleEndorseReferral}
         />
       </div>
     </div>

@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import AnnualSummaryReport from "@/components/reports/annual-summary-report";
+import MonthlyTrainingReport from "@/components/reports/monthly-training-report";
 import { 
   File, 
   FileSpreadsheet, 
@@ -342,7 +342,7 @@ export default function ReportsPage() {
                             <SelectItem value="completion">Completion Report</SelectItem>
                             <SelectItem value="payment">Payment Report</SelectItem>
                             <SelectItem value="employment">Employment Report</SelectItem>
-                            <SelectItem value="annual">Annual Summary Report</SelectItem>
+                            <SelectItem value="monthly">Monthly Training Report</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

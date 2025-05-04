@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
-import { Loader2, Search, FileText, Download, Eye, Filter } from "lucide-react";
+import { Loader2, Search, FileText, Download, Eye, Filter, CheckCircle } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -136,7 +136,10 @@ const sampleAssessments: Assessment[] = [
 const ResultBadge = ({ result }: { result: Assessment["result"] }) => {
   switch (result) {
     case "Pass":
-      return <Badge variant="success">Pass</Badge>;
+      return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 flex items-center gap-1">
+        <CheckCircle className="h-3 w-3" />
+        <span>Pass</span>
+      </Badge>;
     case "Fail":
       return <Badge variant="destructive">Fail</Badge>;
     case "Pending":
@@ -330,15 +333,9 @@ export default function AssessmentResultsPage() {
                         <TableCell><TypeBadge type={assessment.assessmentType} /></TableCell>
                         <TableCell>{new Date(assessment.assessmentDate).toLocaleDateString()}</TableCell>
                         <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <span className="text-sm">
-                              {assessment.score} / {assessment.maxScore}
-                            </span>
-                            <Progress 
-                              value={calculateScorePercentage(assessment.score, assessment.maxScore)} 
-                              className="h-2"
-                            />
-                          </div>
+                          <span className="font-medium">
+                            {Math.round(assessment.score)}
+                          </span>
                         </TableCell>
                         <TableCell><ResultBadge result={assessment.result} /></TableCell>
                         <TableCell className="text-right">
@@ -424,20 +421,16 @@ export default function AssessmentResultsPage() {
                   
                   <div className="border-t pt-4">
                     <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                      Grade Breakdown
+                      Grade
                     </h4>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">
-                        {selectedAssessment.score} / {selectedAssessment.maxScore}
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-xl">
+                        {Math.round(selectedAssessment.score)}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        {calculateScorePercentage(selectedAssessment.score, selectedAssessment.maxScore).toFixed(1)}%
+                        out of {selectedAssessment.maxScore} ({calculateScorePercentage(selectedAssessment.score, selectedAssessment.maxScore).toFixed(0)}%)
                       </span>
                     </div>
-                    <Progress 
-                      value={calculateScorePercentage(selectedAssessment.score, selectedAssessment.maxScore)} 
-                      className="h-2"
-                    />
                   </div>
                   
                   <div className="border-t pt-4">

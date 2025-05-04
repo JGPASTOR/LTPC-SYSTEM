@@ -388,8 +388,8 @@ export default function ReportsPage() {
                   
                   <TabsContent value="chart" className="w-full">
                     <div className="h-[400px] w-full">
-                      {reportType === "annual" && (
-                        <AnnualSummaryReport />
+                      {reportType === "monthly" && (
+                        <MonthlyTrainingReport />
                       )}
                       
                       {reportType === "enrollment" && (
@@ -577,8 +577,8 @@ export default function ReportsPage() {
                   
                   <TabsContent value="data" className="w-full">
                     <div className="h-[400px] w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {reportType === "annual" && (
-                        <AnnualSummaryReport />
+                      {reportType === "monthly" && (
+                        <MonthlyTrainingReport />
                       )}
                     
                       {reportType === "enrollment" && (

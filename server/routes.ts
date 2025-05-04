@@ -1,7 +1,23 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+
+// Authorization middleware
+function hasRole(...roles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    
+    const userRole = req.user?.role;
+    if (!userRole || !roles.includes(userRole)) {
+      return res.status(403).json({ error: "Forbidden - Insufficient permissions" });
+    }
+    
+    next();
+  };
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes

@@ -8,7 +8,7 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   name: text("name").notNull(),
-  role: text("role").notNull(), // admin, pesdo_officer, enrollment_officer, cashier
+  role: text("role").notNull(), // pesdo_admin, enrollment_officer, cashier
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

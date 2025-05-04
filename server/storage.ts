@@ -95,7 +95,23 @@ export class MemStorage implements IStorage {
       username: "admin",
       password: "admin123",
       name: "System Administrator",
-      role: "admin"
+      role: "pesdo_admin"
+    });
+    
+    // Add sample enrollment officer
+    this.createUser({
+      username: "enrollment",
+      password: "enrollment123",
+      name: "Enrollment Officer",
+      role: "enrollment_officer"
+    });
+    
+    // Add sample cashier
+    this.createUser({
+      username: "cashier",
+      password: "cashier123",
+      name: "Cashier",
+      role: "cashier"
     });
   }
   

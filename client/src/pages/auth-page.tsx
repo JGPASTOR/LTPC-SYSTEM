@@ -64,7 +64,7 @@ export default function AuthPage() {
       password: "",
       confirmPassword: "",
       name: "",
-      role: "enrollment_officer",
+      role: "pesdo_admin",
     },
   });
 
@@ -205,8 +205,7 @@ export default function AuthPage() {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="admin">Admin</SelectItem>
-                                <SelectItem value="pesdo_officer">PESDO Officer</SelectItem>
+                                <SelectItem value="pesdo_admin">PESDO Admin</SelectItem>
                                 <SelectItem value="enrollment_officer">Enrollment Officer</SelectItem>
                                 <SelectItem value="cashier">Cashier</SelectItem>
                               </SelectContent>

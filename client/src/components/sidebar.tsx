@@ -68,15 +68,38 @@ export function Sidebar() {
       <nav className="px-2 flex-1 overflow-y-auto">
         <p className="text-xs uppercase text-gray-400 pl-3 mb-2 mt-4">Main Navigation</p>
         <NavItem href="/" icon={LayoutDashboard}>Dashboard</NavItem>
-        <NavItem href="/courses" icon={BookOpen}>Courses</NavItem>
-        <NavItem href="/trainees" icon={Users}>Trainees</NavItem>
-        <NavItem href="/trainers" icon={GraduationCap}>Trainers</NavItem>
-        <NavItem href="/payments" icon={Wallet}>Payments</NavItem>
-        <NavItem href="/reports" icon={FileText}>Reports</NavItem>
         
-        <p className="text-xs uppercase text-gray-400 pl-3 mb-2 mt-6">Administration</p>
-        <NavItem href="/users" icon={User}>Users</NavItem>
-        <NavItem href="/settings" icon={Settings}>Settings</NavItem>
+        {/* Show all navigation options for PESDO Admin */}
+        {user?.role === "pesdo_admin" && (
+          <>
+            <NavItem href="/courses" icon={BookOpen}>Courses</NavItem>
+            <NavItem href="/trainees" icon={Users}>Trainees</NavItem>
+            <NavItem href="/trainers" icon={GraduationCap}>Trainers</NavItem>
+            <NavItem href="/payments" icon={Wallet}>Payments</NavItem>
+            <NavItem href="/reports" icon={FileText}>Reports</NavItem>
+            
+            <p className="text-xs uppercase text-gray-400 pl-3 mb-2 mt-6">Administration</p>
+            <NavItem href="/users" icon={User}>Users</NavItem>
+            <NavItem href="/settings" icon={Settings}>Settings</NavItem>
+          </>
+        )}
+        
+        {/* Enrollment Officer can access courses, trainees, and trainers */}
+        {user?.role === "enrollment_officer" && (
+          <>
+            <NavItem href="/courses" icon={BookOpen}>Courses</NavItem>
+            <NavItem href="/trainees" icon={Users}>Trainees</NavItem>
+            <NavItem href="/trainers" icon={GraduationCap}>Trainers</NavItem>
+          </>
+        )}
+        
+        {/* Cashier can access payments only */}
+        {user?.role === "cashier" && (
+          <>
+            <NavItem href="/trainees" icon={Users}>Trainees</NavItem>
+            <NavItem href="/payments" icon={Wallet}>Payments</NavItem>
+          </>
+        )}
       </nav>
       
       <div className="p-4 border-t border-sidebar-border">

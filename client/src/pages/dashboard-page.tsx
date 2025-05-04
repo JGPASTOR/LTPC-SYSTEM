@@ -10,6 +10,7 @@ import { RecentActivities, Activity } from "@/components/dashboard/recent-activi
 import { EnrollmentTable, Enrollment } from "@/components/enrollments/enrollment-table";
 import { UserCheck, BookOpen, GraduationCap, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 // Define dummy data (this would come from the API in a real implementation)
 const getMonthlyEnrollmentData = () => [
@@ -178,6 +179,7 @@ const getRecentEnrollments = (): Enrollment[] => [
 export default function DashboardPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Here we'd use real API data in a production app
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -204,6 +206,31 @@ export default function DashboardPage() {
     });
   };
 
+  // Role-specific title and welcome message
+  const getDashboardTitle = () => {
+    switch (user?.role) {
+      case "pesdo_admin":
+        return "PESDO Admin Dashboard";
+      case "enrollment_officer":
+        return "Enrollment Officer Dashboard";
+      case "cashier":
+        return "Cashier Dashboard";
+      default:
+        return "Dashboard";
+    }
+  };
+
+  const getWelcomeMessage = () => {
+    const timeOfDay = new Date().getHours();
+    let greeting = "Good ";
+    
+    if (timeOfDay < 12) greeting += "morning";
+    else if (timeOfDay < 18) greeting += "afternoon";
+    else greeting += "evening";
+    
+    return `${greeting}, ${user?.name}. Welcome to your ${user?.role.replace('_', ' ')} dashboard.`;
+  };
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
@@ -215,8 +242,15 @@ export default function DashboardPage() {
         
         {/* Dashboard Content */}
         <main className="flex-1 overflow-y-auto p-6">
-          {/* Quick Stats */}
+          {/* Dashboard Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">{getDashboardTitle()}</h1>
+            <p className="text-muted-foreground">{getWelcomeMessage()}</p>
+          </div>
+
+          {/* Quick Stats - Shown to all roles */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            {/* All users see enrollments */}
             <StatsCard
               title="Total Enrollments"
               value={stats?.totalEnrollments || 0}
@@ -225,56 +259,121 @@ export default function DashboardPage() {
               iconColor="text-primary"
               changeValue={12}
             />
-            <StatsCard
-              title="Active Courses"
-              value={stats?.activeCourses || 0}
-              icon={BookOpen}
-              iconBgColor="bg-secondary"
-              iconColor="text-secondary"
-              changeValue={5}
-            />
-            <StatsCard
-              title="Completed Trainings"
-              value={stats?.completedTrainings || 0}
-              icon={GraduationCap}
-              iconBgColor="bg-success"
-              iconColor="text-success"
-              changeValue={8}
-            />
-            <StatsCard
-              title="Payment Collection"
-              value={stats?.paymentCollection || "₱0"}
-              icon={Wallet}
-              iconBgColor="bg-accent"
-              iconColor="text-accent"
-              changeValue={-3}
-            />
+            
+            {/* PESDO Admin and Enrollment Officer see courses */}
+            {(user?.role === "pesdo_admin" || user?.role === "enrollment_officer") && (
+              <StatsCard
+                title="Active Courses"
+                value={stats?.activeCourses || 0}
+                icon={BookOpen}
+                iconBgColor="bg-secondary"
+                iconColor="text-secondary"
+                changeValue={5}
+              />
+            )}
+            
+            {/* PESDO Admin and Enrollment Officer see completed trainings */}
+            {(user?.role === "pesdo_admin" || user?.role === "enrollment_officer") && (
+              <StatsCard
+                title="Completed Trainings"
+                value={stats?.completedTrainings || 0}
+                icon={GraduationCap}
+                iconBgColor="bg-success"
+                iconColor="text-success"
+                changeValue={8}
+              />
+            )}
+            
+            {/* PESDO Admin and Cashier see payment collections */}
+            {(user?.role === "pesdo_admin" || user?.role === "cashier") && (
+              <StatsCard
+                title="Payment Collection"
+                value={stats?.paymentCollection || "₱0"}
+                icon={Wallet}
+                iconBgColor="bg-accent"
+                iconColor="text-accent"
+                changeValue={-3}
+              />
+            )}
           </div>
           
-          {/* Middle Row Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <EnrollmentChart
-              monthlyData={getMonthlyEnrollmentData()}
-              quarterlyData={getQuarterlyEnrollmentData()}
-              yearlyData={getYearlyEnrollmentData()}
-            />
-            <CourseDistribution
-              data={getCourseDistributionData()}
-            />
-          </div>
+          {/* PESDO Admin sees all charts */}
+          {user?.role === "pesdo_admin" && (
+            <>
+              {/* Middle Row Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <EnrollmentChart
+                  monthlyData={getMonthlyEnrollmentData()}
+                  quarterlyData={getQuarterlyEnrollmentData()}
+                  yearlyData={getYearlyEnrollmentData()}
+                />
+                <CourseDistribution
+                  data={getCourseDistributionData()}
+                />
+              </div>
+              
+              {/* Recent Enrollments Table */}
+              <EnrollmentTable
+                enrollments={getRecentEnrollments()}
+                onView={handleViewEnrollment}
+                onEdit={handleEditEnrollment}
+              />
+              
+              {/* Bottom Row */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <UpcomingBatches batches={getUpcomingBatches()} />
+                <RecentActivities activities={getRecentActivities()} />
+              </div>
+            </>
+          )}
           
-          {/* Recent Enrollments Table */}
-          <EnrollmentTable
-            enrollments={getRecentEnrollments()}
-            onView={handleViewEnrollment}
-            onEdit={handleEditEnrollment}
-          />
+          {/* Enrollment Officer sees enrollment-focused view */}
+          {user?.role === "enrollment_officer" && (
+            <>
+              {/* Enrollments Table */}
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Recent Enrollments</h2>
+                <EnrollmentTable
+                  enrollments={getRecentEnrollments()}
+                  onView={handleViewEnrollment}
+                  onEdit={handleEditEnrollment}
+                />
+              </div>
+              
+              {/* Upcoming Batches */}
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Upcoming Batches</h2>
+                <UpcomingBatches batches={getUpcomingBatches()} />
+              </div>
+            </>
+          )}
           
-          {/* Bottom Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <UpcomingBatches batches={getUpcomingBatches()} />
-            <RecentActivities activities={getRecentActivities()} />
-          </div>
+          {/* Cashier sees payment-focused view */}
+          {user?.role === "cashier" && (
+            <>
+              {/* Enrollments with Payment Status */}
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Payment Status</h2>
+                <EnrollmentTable
+                  enrollments={getRecentEnrollments().sort((a, b) => {
+                    // Show unpaid first, then partial, then paid
+                    const paymentOrder = { "Unpaid": 0, "Partial": 1, "Paid": 2 };
+                    return paymentOrder[a.payment] - paymentOrder[b.payment];
+                  })}
+                  onView={handleViewEnrollment}
+                  onEdit={handleEditEnrollment}
+                />
+              </div>
+              
+              {/* Recent Payment Activities */}
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Recent Payment Activities</h2>
+                <RecentActivities 
+                  activities={getRecentActivities().filter(a => a.type === "payment")} 
+                />
+              </div>
+            </>
+          )}
         </main>
       </div>
     </div>

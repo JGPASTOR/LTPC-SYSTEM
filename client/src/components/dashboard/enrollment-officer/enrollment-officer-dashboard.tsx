@@ -1,9 +1,12 @@
 import { StatsCard } from "@/components/dashboard/stats-card";
-import { UserCheck, BookOpen, GraduationCap } from "lucide-react";
+import { UserCheck, BookOpen, GraduationCap, Award, ClipboardCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { EnrollmentTable, Enrollment } from "@/components/enrollments/enrollment-table";
 import { UpcomingBatches, TrainingBatch } from "@/components/dashboard/upcoming-batches";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AssessmentInput, Trainee } from "./assessment-input";
+import { TrainingResultInput, CompletedTrainee } from "./training-result-input";
 
 // Demo data for enrollment officer
 const getRecentEnrollments = (): Enrollment[] => [
@@ -81,6 +84,63 @@ const getUpcomingBatches = (): TrainingBatch[] => [
   }
 ];
 
+// Sample trainees for assessment input
+const getActiveTrainees = (): Trainee[] => [
+  {
+    id: "T-2023-0124",
+    name: "Juan Dela Cruz",
+    course: "Web Development"
+  },
+  {
+    id: "T-2023-0125",
+    name: "Maria Santos",
+    course: "Baking & Pastry Arts"
+  },
+  {
+    id: "T-2023-0126",
+    name: "Pedro Reyes",
+    course: "Electrical Installation"
+  },
+  {
+    id: "T-2023-0127",
+    name: "Ana Lim",
+    course: "Dressmaking"
+  },
+  {
+    id: "T-2023-0128",
+    name: "Roberto Aquino",
+    course: "Computer Servicing"
+  }
+];
+
+// Sample completed trainees for training result input
+const getCompletedTrainees = (): CompletedTrainee[] => [
+  {
+    id: "T-2023-0129",
+    name: "Elena Torres",
+    course: "Culinary Arts",
+    completionDate: "2023-08-01"
+  },
+  {
+    id: "T-2023-0130",
+    name: "Carlos Rivera",
+    course: "Automotive Servicing",
+    completionDate: "2023-07-15"
+  },
+  {
+    id: "T-2023-0131",
+    name: "Sofia Mendoza",
+    course: "Welding Technology",
+    completionDate: "2023-08-05"
+  },
+  {
+    id: "T-2023-0132",
+    name: "Miguel Santos",
+    course: "Electronics Servicing",
+    completionDate: "2023-07-30"
+  }
+];
+
 export function EnrollmentOfficerDashboard() {
   const { toast } = useToast();
 
@@ -155,6 +215,29 @@ export function EnrollmentOfficerDashboard() {
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-4">Upcoming Batches</h2>
         <UpcomingBatches batches={getUpcomingBatches()} />
+      </div>
+      
+      {/* Assessment and Training Results Input Section */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold mb-4">Record Training Results & Assessments</h2>
+        <Tabs defaultValue="assessment" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="assessment" className="flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4" /> Assessments
+            </TabsTrigger>
+            <TabsTrigger value="training" className="flex items-center gap-2">
+              <Award className="h-4 w-4" /> Training Results
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="assessment">
+            <AssessmentInput trainees={getActiveTrainees()} />
+          </TabsContent>
+          
+          <TabsContent value="training">
+            <TrainingResultInput completedTrainees={getCompletedTrainees()} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TESDA Enrollment Officer Dashboard</title>
+    <link rel="stylesheet" href="../../../../css/style.css">
+    <link rel="stylesheet" href="../../../../css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="../../tesda-logo.png" alt="TESDA Logo">
+                <span>Enrollment Portal</span>
+            </div>
+            <nav class="dashboard-nav">
+                <ul>
+                    <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#"><i class="fas fa-user-plus"></i> New Enrollment</a></li>
+                    <li><a href="#"><i class="fas fa-users"></i> Students</a></li>
+                    <li><a href="#"><i class="fas fa-book"></i> Programs</a></li>
+                    <li><a href="#"><i class="fas fa-file-alt"></i> Documents</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search students or programs...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="user-menu">
+                    <span class="user-name">Enrollment Officer</span>
+                    <img src="../../users/enrollment/enrollment-avatar.png" alt="Enrollment Avatar" class="avatar">
+                </div>
+            </header>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <i class="fas fa-user-plus"></i>
+                    <div class="stat-info">
+                        <h3>New Enrollments</h3>
+                        <p>25</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-info">
+                        <h3>Total Students</h3>
+                        <p>500</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-book"></i>
+                    <div class="stat-info">
+                        <h3>Active Programs</h3>
+                        <p>15</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <div class="stat-info">
+                        <h3>Pending Approvals</h3>
+                        <p>10</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <div class="enrollment-requests">
+                    <h2>Recent Enrollment Requests</h2>
+                    <div class="request-list">
+                        <div class="request-card">
+                            <div class="student-info">
+                                <h3>Juan Dela Cruz</h3>
+                                <p>Technical Skills Development</p>
+                            </div>
+                            <div class="request-details">
+                                <p><i class="fas fa-calendar"></i> Applied: Today</p>
+                                <p><i class="fas fa-file-alt"></i> Documents: Complete</p>
+                                <p><i class="fas fa-money-bill-wave"></i> Payment: Pending</p>
+                            </div>
+                            <div class="request-actions">
+                                <button class="btn btn-primary">Approve</button>
+                                <button class="btn btn-secondary">View Details</button>
+                            </div>
+                        </div>
+                        <div class="request-card">
+                            <div class="student-info">
+                                <h3>Maria Santos</h3>
+                                <p>Vocational Training</p>
+                            </div>
+                            <div class="request-details">
+                                <p><i class="fas fa-calendar"></i> Applied: Yesterday</p>
+                                <p><i class="fas fa-file-alt"></i> Documents: Pending</p>
+                                <p><i class="fas fa-money-bill-wave"></i> Payment: Complete</p>
+                            </div>
+                            <div class="request-actions">
+                                <button class="btn btn-primary">Approve</button>
+                                <button class="btn btn-secondary">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="program-status">
+                    <h2>Program Status</h2>
+                    <div class="status-grid">
+                        <div class="status-card">
+                            <h3>Technical Programs</h3>
+                            <div class="program-list">
+                                <div class="program-item">
+                                    <span>Technical Skills Development</span>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: 75%">75%</div>
+                                    </div>
+                                </div>
+                                <div class="program-item">
+                                    <span>Electrical Installation</span>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: 60%">60%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-card">
+                            <h3>Vocational Programs</h3>
+                            <div class="program-list">
+                                <div class="program-item">
+                                    <span>Welding Technology</span>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: 90%">90%</div>
+                                    </div>
+                                </div>
+                                <div class="program-item">
+                                    <span>Automotive Repair</span>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: 45%">45%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html> 

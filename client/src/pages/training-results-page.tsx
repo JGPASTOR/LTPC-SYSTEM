@@ -65,6 +65,7 @@ interface TrainingResult {
   traineeId: string;
   traineeName: string;
   course: string;
+  enrollmentDate: string;
   completionDate: string;
   overallRating: number;
   feedback: string;
@@ -82,6 +83,7 @@ const sampleTrainingResults: TrainingResult[] = [
     traineeId: "T-2023-0129",
     traineeName: "Elena Torres",
     course: "Culinary Arts",
+    enrollmentDate: "2023-02-15",
     completionDate: "2023-08-01",
     overallRating: 4.8,
     feedback: "Elena has shown exceptional skills in culinary arts and food preparation. Her final project impressed all judges.",
@@ -96,6 +98,7 @@ const sampleTrainingResults: TrainingResult[] = [
     traineeId: "T-2023-0130",
     traineeName: "Carlos Rivera",
     course: "Automotive Servicing",
+    enrollmentDate: "2023-01-20",
     completionDate: "2023-07-15",
     overallRating: 4.2,
     feedback: "Carlos demonstrated good technical knowledge and problem-solving skills throughout the course. He needs more practice with modern diagnostic tools.",
@@ -110,6 +113,7 @@ const sampleTrainingResults: TrainingResult[] = [
     traineeId: "T-2023-0131",
     traineeName: "Sofia Mendoza",
     course: "Welding Technology",
+    enrollmentDate: "2023-03-10",
     completionDate: "2023-08-05",
     overallRating: 4.5,
     feedback: "Sofia has excellent welding skills and attention to detail. She consistently produced high-quality work.",
@@ -124,6 +128,7 @@ const sampleTrainingResults: TrainingResult[] = [
     traineeId: "T-2023-0132",
     traineeName: "Miguel Santos",
     course: "Electronics Servicing",
+    enrollmentDate: "2023-02-01",
     completionDate: "2023-07-30",
     overallRating: 3.7,
     feedback: "Miguel has good theoretical knowledge but needs more hands-on practice. His troubleshooting skills improved significantly over the course.",
@@ -137,6 +142,7 @@ const sampleTrainingResults: TrainingResult[] = [
     traineeId: "T-2023-0133",
     traineeName: "Ana Reyes",
     course: "Dressmaking",
+    enrollmentDate: "2023-04-05",
     completionDate: "2023-08-10",
     overallRating: 4.9,
     feedback: "Ana demonstrated exceptional creativity and craftsmanship. Her final project exceeded expectations in quality and design.",
@@ -365,6 +371,7 @@ export default function TrainingResultsPage() {
                       <TableHead>ID</TableHead>
                       <TableHead>Trainee</TableHead>
                       <TableHead>Course</TableHead>
+                      <TableHead>Enrolled Date</TableHead>
                       <TableHead>Completion Date</TableHead>
                       <TableHead>Grade</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -376,9 +383,10 @@ export default function TrainingResultsPage() {
                         <TableCell className="font-medium">{result.id}</TableCell>
                         <TableCell>{result.traineeName}</TableCell>
                         <TableCell>{result.course}</TableCell>
+                        <TableCell>{result.enrollmentDate ? new Date(result.enrollmentDate).toLocaleDateString() : "N/A"}</TableCell>
                         <TableCell>{new Date(result.completionDate).toLocaleDateString()}</TableCell>
                         <TableCell>
-                          <StarRating rating={result.overallRating} />
+                          <span className="font-medium">{Math.round(result.overallRating * 20)}</span>
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
@@ -432,7 +440,7 @@ export default function TrainingResultsPage() {
                       <h4 className="text-sm font-medium text-muted-foreground mb-1 text-right">
                         Grade
                       </h4>
-                      <StarRating rating={selectedResult.overallRating} />
+                      <p className="text-right font-medium text-xl">{Math.round(selectedResult.overallRating * 20)}</p>
                     </div>
                   </div>
                   
@@ -454,6 +462,15 @@ export default function TrainingResultsPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                        Enrolled Date
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <p>{selectedResult.enrollmentDate ? new Date(selectedResult.enrollmentDate).toLocaleDateString() : "N/A"}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
                         Completion Date
                       </h4>
                       <div className="flex items-center gap-2">
@@ -461,11 +478,24 @@ export default function TrainingResultsPage() {
                         <p>{new Date(selectedResult.completionDate).toLocaleDateString()}</p>
                       </div>
                     </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h4 className="text-sm font-medium text-muted-foreground mb-1">
                         Employment Status
                       </h4>
                       <EmploymentBadge status={selectedResult.employmentStatus} />
+                    </div>
+                    <div>
+                      {selectedResult.employmentDetails && (
+                        <>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                            Employment Details
+                          </h4>
+                          <p className="text-sm">{selectedResult.employmentDetails}</p>
+                        </>
+                      )}
                     </div>
                   </div>
                   

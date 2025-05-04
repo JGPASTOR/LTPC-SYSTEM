@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,10 +16,26 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Edit, Eye, Plus, Search, Download, FileText } from "lucide-react";
+import { 
+  Edit, 
+  Eye, 
+  Plus, 
+  Search, 
+  Download, 
+  FileText, 
+  Award,
+  FileCheck,
+  ClipboardCheck,
+  Check,
+  XCircle
+} from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 
 // Trainer interface for selection in trainee registration
 interface Trainer {
@@ -41,6 +57,36 @@ interface Trainee {
   payment: "Paid" | "Partial" | "Unpaid";
   trainerId?: string;
   trainerName?: string;
+}
+
+// Define assessment interface
+interface Assessment {
+  id: string;
+  traineeId: string;
+  traineeName: string;
+  course: string;
+  assessmentType: "Written" | "Practical" | "Project" | "Final";
+  assessmentDate: string;
+  score: number;
+  maxScore: number;
+  result: "Pass" | "Fail" | "Pending";
+  comments: string;
+}
+
+// Define training result interface
+interface TrainingResult {
+  id: string;
+  traineeId: string;
+  traineeName: string;
+  course: string;
+  completionDate: string;
+  overallRating: number;
+  feedback: string;
+  certificateIssued: boolean;
+  certificateNumber?: string;
+  issuedDate?: string;
+  employmentStatus: "Employed" | "Unemployed" | "Referred" | "Unknown";
+  employmentDetails?: string;
 }
 
 // Sample trainees data
@@ -132,13 +178,92 @@ const sampleAvailableTrainers: Trainer[] = [
   { id: "TR005", name: "Ana Lim", expertise: "Baking & Pastry Arts" }
 ];
 
+// Sample assessments data
+const sampleAssessments: Assessment[] = [
+  {
+    id: "A-001",
+    traineeId: "T-2023-0124",
+    traineeName: "Juan Dela Cruz",
+    course: "Web Development",
+    assessmentType: "Written",
+    assessmentDate: "2023-06-01",
+    score: 85,
+    maxScore: 100,
+    result: "Pass",
+    comments: "Good understanding of HTML and CSS concepts."
+  },
+  {
+    id: "A-002",
+    traineeId: "T-2023-0124",
+    traineeName: "Juan Dela Cruz",
+    course: "Web Development",
+    assessmentType: "Practical",
+    assessmentDate: "2023-06-15",
+    score: 90,
+    maxScore: 100,
+    result: "Pass",
+    comments: "Excellent implementation of responsive design principles."
+  },
+  {
+    id: "A-003",
+    traineeId: "T-2023-0129",
+    traineeName: "Elena Torres",
+    course: "Culinary Arts",
+    assessmentType: "Final",
+    assessmentDate: "2023-07-30",
+    score: 95,
+    maxScore: 100,
+    result: "Pass",
+    comments: "Outstanding culinary skills demonstrated in final cooking competition."
+  }
+];
+
+// Sample training results data
+const sampleTrainingResults: TrainingResult[] = [
+  {
+    id: "TR-001",
+    traineeId: "T-2023-0129",
+    traineeName: "Elena Torres",
+    course: "Culinary Arts",
+    completionDate: "2023-08-01",
+    overallRating: 4.8,
+    feedback: "Elena has shown exceptional skills in culinary arts and food preparation. Her final project impressed all judges.",
+    certificateIssued: true,
+    certificateNumber: "CERT-2023-0001",
+    issuedDate: "2023-08-05",
+    employmentStatus: "Employed",
+    employmentDetails: "Hired as Assistant Chef at Surigao Grand Hotel"
+  }
+];
+
 export default function TraineesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isAddAssessmentDialogOpen, setIsAddAssessmentDialogOpen] = useState(false);
+  const [isAddTrainingResultDialogOpen, setIsAddTrainingResultDialogOpen] = useState(false);
   const [selectedTrainee, setSelectedTrainee] = useState<Trainee | null>(null);
+  const [activeTab, setActiveTab] = useState("profile");
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Form state for new assessment
+  const [newAssessment, setNewAssessment] = useState<Partial<Assessment>>({
+    assessmentType: "Written",
+    score: 0,
+    maxScore: 100,
+    result: "Pending",
+    comments: ""
+  });
+
+  // Form state for new training result
+  const [newTrainingResult, setNewTrainingResult] = useState<Partial<TrainingResult>>({
+    overallRating: 0,
+    feedback: "",
+    certificateIssued: false,
+    employmentStatus: "Unknown"
+  });
 
   // Form state for new trainee
   const [newTrainee, setNewTrainee] = useState({
@@ -157,6 +282,20 @@ export default function TraineesPage() {
   const { data: trainees, isLoading } = useQuery({
     queryKey: ["/api/trainees"],
     queryFn: () => sampleTrainees,
+  });
+  
+  // Fetch assessments for selected trainee
+  const { data: assessments } = useQuery({
+    queryKey: ["/api/assessments/trainee", selectedTrainee?.id],
+    queryFn: () => sampleAssessments.filter(a => a.traineeId === selectedTrainee?.id),
+    enabled: !!selectedTrainee && isViewDialogOpen,
+  });
+  
+  // Fetch training results for selected trainee
+  const { data: trainingResult } = useQuery({
+    queryKey: ["/api/training-results/trainee", selectedTrainee?.id],
+    queryFn: () => sampleTrainingResults.find(r => r.traineeId === selectedTrainee?.id),
+    enabled: !!selectedTrainee && isViewDialogOpen,
   });
 
   // Filter trainees based on search query
@@ -208,6 +347,130 @@ export default function TraineesPage() {
   const handleViewTrainee = (trainee: Trainee) => {
     setSelectedTrainee(trainee);
     setIsViewDialogOpen(true);
+  };
+  
+  // Add assessment mutation
+  const createAssessmentMutation = useMutation({
+    mutationFn: async (assessment: Partial<Assessment>) => {
+      // Normally you would use API, but we're using sample data for now
+      // return apiRequest("POST", "/api/assessments", assessment);
+      const newId = `A-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      const newAssessment: Assessment = {
+        id: newId,
+        traineeId: selectedTrainee?.id || "",
+        traineeName: selectedTrainee?.name || "",
+        course: selectedTrainee?.course || "",
+        assessmentType: assessment.assessmentType as Assessment["assessmentType"],
+        assessmentDate: new Date().toISOString().split('T')[0],
+        score: assessment.score || 0,
+        maxScore: assessment.maxScore || 100,
+        result: assessment.result as Assessment["result"],
+        comments: assessment.comments || ""
+      };
+      
+      // Add to sample data (in real app, this would be done by the server)
+      sampleAssessments.push(newAssessment);
+      return newAssessment;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/assessments/trainee", selectedTrainee?.id] });
+      setIsAddAssessmentDialogOpen(false);
+      toast({
+        title: "Assessment Added",
+        description: "The assessment has been successfully recorded.",
+      });
+      // Reset form
+      setNewAssessment({
+        assessmentType: "Written",
+        score: 0,
+        maxScore: 100,
+        result: "Pending",
+        comments: ""
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to Add Assessment",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Add training result mutation
+  const createTrainingResultMutation = useMutation({
+    mutationFn: async (result: Partial<TrainingResult>) => {
+      // Normally you would use API, but we're using sample data for now
+      // return apiRequest("POST", "/api/training-results", result);
+      const newId = `TR-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      const certificateNumber = result.certificateIssued 
+        ? `CERT-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`
+        : undefined;
+      
+      const newTrainingResult: TrainingResult = {
+        id: newId,
+        traineeId: selectedTrainee?.id || "",
+        traineeName: selectedTrainee?.name || "",
+        course: selectedTrainee?.course || "",
+        completionDate: new Date().toISOString().split('T')[0],
+        overallRating: result.overallRating || 0,
+        feedback: result.feedback || "",
+        certificateIssued: result.certificateIssued || false,
+        certificateNumber,
+        issuedDate: result.certificateIssued ? new Date().toISOString().split('T')[0] : undefined,
+        employmentStatus: result.employmentStatus as TrainingResult["employmentStatus"],
+        employmentDetails: result.employmentDetails
+      };
+      
+      // Add to sample data (in real app, this would be done by the server)
+      sampleTrainingResults.push(newTrainingResult);
+      return newTrainingResult;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/training-results/trainee", selectedTrainee?.id] });
+      setIsAddTrainingResultDialogOpen(false);
+      toast({
+        title: "Training Result Added",
+        description: "The training result has been successfully recorded.",
+      });
+      // Reset form
+      setNewTrainingResult({
+        overallRating: 0,
+        feedback: "",
+        certificateIssued: false,
+        employmentStatus: "Unknown"
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to Add Training Result",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Handle creating assessment
+  const handleCreateAssessment = () => {
+    if (!selectedTrainee) return;
+    
+    // Calculate result based on score percentage
+    const scorePercentage = (newAssessment.score || 0) / (newAssessment.maxScore || 100) * 100;
+    const calculatedResult: Assessment["result"] = 
+      scorePercentage >= 75 ? "Pass" : 
+      scorePercentage < 75 ? "Fail" : 
+      "Pending";
+    
+    createAssessmentMutation.mutate({
+      ...newAssessment,
+      result: calculatedResult
+    });
+  };
+  
+  // Handle creating training result
+  const handleCreateTrainingResult = () => {
+    if (!selectedTrainee) return;
+    createTrainingResultMutation.mutate(newTrainingResult);
   };
 
   // Get status badge variant
@@ -515,7 +778,7 @@ export default function TraineesPage() {
       
       {/* View Trainee Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Trainee Details</DialogTitle>
             <DialogDescription>
@@ -524,56 +787,244 @@ export default function TraineesPage() {
           </DialogHeader>
           {selectedTrainee && (
             <div className="py-4">
-              <div className="flex items-center justify-center mb-6">
-                <Avatar className="h-20 w-20 bg-primary text-white">
+              <div className="flex items-center mb-6">
+                <Avatar className="h-20 w-20 bg-primary text-white mr-4">
                   <AvatarFallback className="text-2xl">{getInitials(selectedTrainee.name)}</AvatarFallback>
                 </Avatar>
+                <div>
+                  <h3 className="text-xl font-bold">{selectedTrainee.name}</h3>
+                  <p className="text-muted-foreground">{selectedTrainee.id}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    {getStatusBadge(selectedTrainee.status)}
+                    {getPaymentBadge(selectedTrainee.payment)}
+                  </div>
+                </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">ID</p>
-                  <p className="font-medium">{selectedTrainee.id}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Name</p>
-                  <p className="font-medium">{selectedTrainee.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Gender</p>
-                  <p className="font-medium">{selectedTrainee.gender}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Contact</p>
-                  <p className="font-medium">{selectedTrainee.contact}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-muted-foreground">Address</p>
-                  <p className="font-medium">{selectedTrainee.address}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Course</p>
-                  <p className="font-medium">{selectedTrainee.course}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Enrollment Date</p>
-                  <p className="font-medium">{new Date(selectedTrainee.enrollmentDate).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
-                  <div className="mt-1">{getStatusBadge(selectedTrainee.status)}</div>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Payment</p>
-                  <div className="mt-1">{getPaymentBadge(selectedTrainee.payment)}</div>
-                </div>
-                {selectedTrainee.trainerId && selectedTrainee.trainerName && (
-                  <div className="col-span-2 mt-2 pt-2 border-t">
-                    <p className="text-sm text-muted-foreground">Assigned Trainer</p>
-                    <p className="font-medium">{selectedTrainee.trainerName}</p>
+              <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="mt-4">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="profile">
+                    <div className="flex items-center">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Profile
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="assessments" disabled={user?.role !== "pesdo_admin"}>
+                    <div className="flex items-center">
+                      <ClipboardCheck className="mr-2 h-4 w-4" />
+                      Assessments
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="training-result" disabled={user?.role !== "pesdo_admin"}>
+                    <div className="flex items-center">
+                      <Award className="mr-2 h-4 w-4" />
+                      Training Result
+                    </div>
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="profile" className="mt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Gender</p>
+                      <p className="font-medium">{selectedTrainee.gender}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Contact</p>
+                      <p className="font-medium">{selectedTrainee.contact}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-sm text-muted-foreground">Address</p>
+                      <p className="font-medium">{selectedTrainee.address}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Course</p>
+                      <p className="font-medium">{selectedTrainee.course}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Enrollment Date</p>
+                      <p className="font-medium">{new Date(selectedTrainee.enrollmentDate).toLocaleDateString()}</p>
+                    </div>
+                    {selectedTrainee.trainerId && selectedTrainee.trainerName && (
+                      <div className="col-span-2 mt-2 pt-2 border-t">
+                        <p className="text-sm text-muted-foreground">Assigned Trainer</p>
+                        <p className="font-medium">{selectedTrainee.trainerName}</p>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </TabsContent>
+                
+                <TabsContent value="assessments" className="mt-4">
+                  {assessments && assessments.length > 0 ? (
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">Assessment Results</h3>
+                        {user?.role === "pesdo_admin" && (
+                          <Button 
+                            size="sm" 
+                            className="flex items-center gap-1"
+                            onClick={() => setIsAddAssessmentDialogOpen(true)}
+                          >
+                            <Plus className="h-4 w-4" /> Add Assessment
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {assessments.map((assessment) => (
+                          <Card key={assessment.id}>
+                            <CardContent className="pt-6">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="font-semibold">{assessment.assessmentType} Assessment</h4>
+                                    {assessment.result === "Pass" ? (
+                                      <Badge className="bg-green-100 text-green-800">Pass</Badge>
+                                    ) : assessment.result === "Fail" ? (
+                                      <Badge className="bg-red-100 text-red-800">Fail</Badge>
+                                    ) : (
+                                      <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {new Date(assessment.assessmentDate).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-lg font-bold">
+                                    {assessment.score}/{assessment.maxScore}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {Math.round((assessment.score / assessment.maxScore) * 100)}%
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {assessment.comments && (
+                                <div className="mt-3 pt-3 border-t">
+                                  <p className="text-sm text-muted-foreground">Comments</p>
+                                  <p className="text-sm">{assessment.comments}</p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <ClipboardCheck className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                      <h3 className="text-lg font-semibold mb-1">No Assessments Yet</h3>
+                      <p className="text-muted-foreground mb-4">This trainee has no recorded assessments.</p>
+                      {user?.role === "pesdo_admin" && (
+                        <Button 
+                          size="sm" 
+                          className="flex items-center gap-1 mx-auto"
+                          onClick={() => setIsAddAssessmentDialogOpen(true)}
+                        >
+                          <Plus className="h-4 w-4" /> Add First Assessment
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="training-result" className="mt-4">
+                  {trainingResult ? (
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">Training Result</h3>
+                        {user?.role === "pesdo_admin" && (
+                          <Button size="sm" variant="outline">
+                            Edit Result
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h4 className="font-semibold text-lg">{trainingResult.course}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                Completed on {new Date(trainingResult.completionDate).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xl font-bold">{trainingResult.overallRating}/5.0</div>
+                              <div className="text-sm text-muted-foreground">Overall Rating</div>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-4">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Feedback</p>
+                              <p className="text-sm">{trainingResult.feedback}</p>
+                            </div>
+                            
+                            <div className="flex justify-between pt-3 border-t">
+                              <div>
+                                <p className="text-sm text-muted-foreground">Certificate Status</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  {trainingResult.certificateIssued ? (
+                                    <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
+                                      <Check className="h-3 w-3" /> Issued
+                                    </Badge>
+                                  ) : (
+                                    <Badge className="bg-yellow-100 text-yellow-800 flex items-center gap-1">
+                                      <XCircle className="h-3 w-3" /> Not Issued
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              {trainingResult.certificateIssued && (
+                                <div className="text-right">
+                                  <p className="text-sm text-muted-foreground">Certificate Number</p>
+                                  <p className="font-medium">{trainingResult.certificateNumber}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Issued on {new Date(trainingResult.issuedDate || "").toLocaleDateString()}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="pt-3 border-t">
+                              <p className="text-sm text-muted-foreground">Employment Status</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge className={`${
+                                  trainingResult.employmentStatus === "Employed" ? "bg-green-100 text-green-800" : 
+                                  trainingResult.employmentStatus === "Referred" ? "bg-blue-100 text-blue-800" : 
+                                  "bg-gray-100 text-gray-800"
+                                }`}>
+                                  {trainingResult.employmentStatus}
+                                </Badge>
+                              </div>
+                              {trainingResult.employmentDetails && (
+                                <p className="text-sm mt-1">{trainingResult.employmentDetails}</p>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Award className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                      <h3 className="text-lg font-semibold mb-1">No Training Result Yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        {selectedTrainee.status === "Completed" 
+                          ? "This trainee has completed training but no result has been recorded."
+                          : "Results will be available once training is completed."}
+                      </p>
+                      {user?.role === "pesdo_admin" && selectedTrainee.status === "Completed" && (
+                        <Button size="sm" className="flex items-center gap-1 mx-auto">
+                          <Plus className="h-4 w-4" /> Add Training Result
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
           )}
           <DialogFooter>

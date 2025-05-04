@@ -15,10 +15,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Eye, Edit, Plus, Search, Mail, Phone } from "lucide-react";
+import { Eye, Edit, Plus, Search, Mail, Phone, Clock, Calendar } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+
+// Define schedule interface
+interface ScheduleDay {
+  day: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+  startTime: string;
+  endTime: string;
+  available: boolean;
+}
 
 // Define trainer interface
 interface Trainer {
@@ -30,6 +40,7 @@ interface Trainer {
   bio: string;
   activeCourses: number;
   totalTrainees: number;
+  schedule?: ScheduleDay[];
 }
 
 // Sample trainers data
@@ -94,13 +105,25 @@ export default function TrainersPage() {
   const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
   const { toast } = useToast();
 
+  // Default schedule for all weekdays
+  const defaultSchedule: ScheduleDay[] = [
+    { day: "Monday", startTime: "08:00", endTime: "17:00", available: true },
+    { day: "Tuesday", startTime: "08:00", endTime: "17:00", available: true },
+    { day: "Wednesday", startTime: "08:00", endTime: "17:00", available: true },
+    { day: "Thursday", startTime: "08:00", endTime: "17:00", available: true },
+    { day: "Friday", startTime: "08:00", endTime: "17:00", available: true },
+    { day: "Saturday", startTime: "08:00", endTime: "12:00", available: false },
+    { day: "Sunday", startTime: "08:00", endTime: "12:00", available: false }
+  ];
+
   // Form state for new trainer
   const [newTrainer, setNewTrainer] = useState({
     name: "",
     expertise: "",
     email: "",
     phone: "",
-    bio: ""
+    bio: "",
+    schedule: [...defaultSchedule]
   });
 
   // Fetch trainers
@@ -129,7 +152,8 @@ export default function TrainersPage() {
       expertise: "",
       email: "",
       phone: "",
-      bio: ""
+      bio: "",
+      schedule: [...defaultSchedule]
     });
   };
 

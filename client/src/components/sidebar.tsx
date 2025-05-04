@@ -33,12 +33,13 @@ export function Sidebar() {
   const NavItem = ({ href, icon: Icon, children }: { href: string; icon: React.ElementType; children: React.ReactNode }) => {
     const isActive = location === href;
     return (
-      <Link href={href}>
-        <a className={`sidebar-link ${isActive ? 'sidebar-active' : ''}`}>
-          <Icon className="w-5 h-5 mr-3" />
-          <span>{children}</span>
-        </a>
-      </Link>
+      <div 
+        className={`sidebar-link ${isActive ? 'sidebar-active' : ''} cursor-pointer`}
+        onClick={() => window.location.href = href}
+      >
+        <Icon className="w-5 h-5 mr-3" />
+        <span>{children}</span>
+      </div>
     );
   };
 

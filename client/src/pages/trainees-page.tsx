@@ -122,7 +122,7 @@ const sampleTrainees: Trainee[] = [
     course: "Electrical Installation",
     enrollmentDate: "2023-05-20",
     status: "Active",
-    payment: "Partial"
+    payment: "Unpaid"
   },
   {
     id: "T-2023-0127",
@@ -144,7 +144,7 @@ const sampleTrainees: Trainee[] = [
     course: "Computer Servicing",
     enrollmentDate: "2023-06-10",
     status: "Active",
-    payment: "Partial"
+    payment: "Unpaid"
   },
   {
     id: "T-2023-0129",
@@ -298,13 +298,22 @@ export default function TraineesPage() {
     enabled: !!selectedTrainee && isViewDialogOpen,
   });
 
-  // Filter trainees based on search query
+  // State for course filter
+  const [courseFilter, setCourseFilter] = useState<string>("");
+  
+  // Filter trainees based on search query and course filter
   const filteredTrainees = trainees?.filter(
-    (trainee) =>
-      trainee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      trainee.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      trainee.course.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      trainee.status.toLowerCase().includes(searchQuery.toLowerCase())
+    (trainee) => {
+      // First apply course filter if selected
+      if (courseFilter && trainee.course !== courseFilter) {
+        return false;
+      }
+      
+      // Then apply search query filter
+      return trainee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        trainee.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        trainee.status.toLowerCase().includes(searchQuery.toLowerCase());
+    }
   );
 
   // Function to get trainer name by ID
@@ -492,8 +501,6 @@ export default function TraineesPage() {
     switch (payment) {
       case "Paid":
         return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{payment}</Badge>;
-      case "Partial":
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">{payment}</Badge>;
       case "Unpaid":
         return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">{payment}</Badge>;
       default:
@@ -613,7 +620,6 @@ export default function TraineesPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Paid">Paid</SelectItem>
-                          <SelectItem value="Partial">Partial</SelectItem>
                           <SelectItem value="Unpaid">Unpaid</SelectItem>
                         </SelectContent>
                       </Select>
@@ -666,16 +672,36 @@ export default function TraineesPage() {
           
           <Card>
             <CardHeader className="pb-3">
-              <div className="flex justify-between items-center">
-                <CardTitle>All Trainees</CardTitle>
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    className="pl-10"
-                    placeholder="Search trainees..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-center">
+                  <CardTitle>All Trainees</CardTitle>
+                  <div className="relative w-64">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      className="pl-10"
+                      placeholder="Search trainees..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <Label htmlFor="courseFilter">Filter by Course:</Label>
+                  <Select 
+                    value={courseFilter} 
+                    onValueChange={setCourseFilter}
+                  >
+                    <SelectTrigger id="courseFilter" className="w-[220px]">
+                      <SelectValue placeholder="All Courses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Courses</SelectItem>
+                      {courses.map(course => (
+                        <SelectItem key={course} value={course}>{course}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardHeader>
@@ -686,7 +712,6 @@ export default function TraineesPage() {
                     <TableRow>
                       <TableHead>ID</TableHead>
                       <TableHead>Name</TableHead>
-                      <TableHead>Course</TableHead>
                       <TableHead>Trainer</TableHead>
                       <TableHead>Enrollment Date</TableHead>
                       <TableHead>Status</TableHead>

@@ -17,7 +17,8 @@ import {
   CheckCircle,
   Briefcase,
   Calendar,
-  X
+  X,
+  BookOpen
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -247,6 +248,7 @@ export default function TrainingResultsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterEmployment, setFilterEmployment] = useState<string | null>(null);
   const [filterCertificate, setFilterCertificate] = useState<string | null>(null);
+  const [filterCourse, setFilterCourse] = useState<string | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedResult, setSelectedResult] = useState<TrainingResult | null>(null);
   const { toast } = useToast();
@@ -276,7 +278,12 @@ export default function TrainingResultsPage() {
       (filterCertificate === "issued" && result.certificateIssued) ||
       (filterCertificate === "pending" && !result.certificateIssued);
     
-    return matchesSearch && matchesEmployment && matchesCertificate;
+    // Apply course filter if selected
+    const matchesCourse = !filterCourse ||
+      filterCourse === "all_courses" ||
+      result.course === filterCourse;
+    
+    return matchesSearch && matchesEmployment && matchesCertificate && matchesCourse;
   });
 
   // Handler for viewing a training result
@@ -293,11 +300,15 @@ export default function TrainingResultsPage() {
     });
   };
 
+  // Get unique courses for the filter dropdown
+  const uniqueCourses = Array.from(new Set(trainingResults.map(result => result.course)));
+
   // Reset all filters
   const handleResetFilters = () => {
     setSearchQuery("");
     setFilterEmployment(null);
     setFilterCertificate(null);
+    setFilterCourse(null);
   };
 
   return (
@@ -315,7 +326,7 @@ export default function TrainingResultsPage() {
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">Training Results</h1>
             
-            <Button variant="outline" onClick={handleResetFilters} disabled={!filterEmployment && !filterCertificate && !searchQuery}>
+            <Button variant="outline" onClick={handleResetFilters} disabled={!filterEmployment && !filterCertificate && !filterCourse && !searchQuery}>
               Reset Filters
             </Button>
           </div>
@@ -332,7 +343,23 @@ export default function TrainingResultsPage() {
               />
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              {/* Course Filter */}
+              <Select value={filterCourse || ""} onValueChange={(value) => setFilterCourse(value || null)}>
+                <SelectTrigger className="w-[180px]">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    {filterCourse ? `${filterCourse}` : "Filter by Program"}
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all_courses">All Programs</SelectItem>
+                  {uniqueCourses.map(course => (
+                    <SelectItem key={course} value={course}>{course}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               <Select value={filterEmployment || ""} onValueChange={(value) => setFilterEmployment(value || null)}>
                 <SelectTrigger className="w-[180px]">
                   <div className="flex items-center gap-2">

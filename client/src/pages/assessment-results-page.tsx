@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
-import { Loader2, Search, FileText, Download, Eye, Filter, CheckCircle } from "lucide-react";
+import { Loader2, Search, FileText, Download, Eye, Filter, CheckCircle, BookOpen } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

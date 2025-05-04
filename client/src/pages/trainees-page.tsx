@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
@@ -33,7 +34,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Textarea } from "@/components/ui/textarea";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -1017,7 +1017,11 @@ export default function TraineesPage() {
                           : "Results will be available once training is completed."}
                       </p>
                       {user?.role === "pesdo_admin" && selectedTrainee.status === "Completed" && (
-                        <Button size="sm" className="flex items-center gap-1 mx-auto">
+                        <Button 
+                          size="sm" 
+                          className="flex items-center gap-1 mx-auto"
+                          onClick={() => setIsAddTrainingResultDialogOpen(true)}
+                        >
                           <Plus className="h-4 w-4" /> Add Training Result
                         </Button>
                       )}
@@ -1029,6 +1033,195 @@ export default function TraineesPage() {
           )}
           <DialogFooter>
             <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Assessment Dialog */}
+      <Dialog open={isAddAssessmentDialogOpen} onOpenChange={setIsAddAssessmentDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Assessment</DialogTitle>
+            <DialogDescription>
+              Record a new assessment for {selectedTrainee?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="assessmentType">Assessment Type</Label>
+              <Select
+                value={newAssessment.assessmentType as string}
+                onValueChange={(value) => setNewAssessment({ ...newAssessment, assessmentType: value as Assessment["assessmentType"] })}
+              >
+                <SelectTrigger id="assessmentType">
+                  <SelectValue placeholder="Select assessment type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Written">Written</SelectItem>
+                  <SelectItem value="Practical">Practical</SelectItem>
+                  <SelectItem value="Project">Project</SelectItem>
+                  <SelectItem value="Final">Final</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="score">Score</Label>
+                <Input 
+                  id="score" 
+                  type="number"
+                  min="0"
+                  max={newAssessment.maxScore}
+                  value={newAssessment.score?.toString() || "0"}
+                  onChange={(e) => setNewAssessment({ 
+                    ...newAssessment, 
+                    score: parseInt(e.target.value) || 0 
+                  })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="maxScore">Maximum Score</Label>
+                <Input 
+                  id="maxScore" 
+                  type="number"
+                  min="1"
+                  value={newAssessment.maxScore?.toString() || "100"}
+                  onChange={(e) => setNewAssessment({ 
+                    ...newAssessment, 
+                    maxScore: parseInt(e.target.value) || 100
+                  })}
+                />
+              </div>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="comments">Comments/Feedback</Label>
+              <Textarea
+                id="comments"
+                placeholder="Provide feedback on the assessment..."
+                value={newAssessment.comments || ""}
+                onChange={(e) => setNewAssessment({ ...newAssessment, comments: e.target.value })}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddAssessmentDialogOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={handleCreateAssessment}
+              disabled={createAssessmentMutation.isPending}
+            >
+              {createAssessmentMutation.isPending ? "Saving..." : "Save Assessment"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Training Result Dialog */}
+      <Dialog open={isAddTrainingResultDialogOpen} onOpenChange={setIsAddTrainingResultDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Training Result</DialogTitle>
+            <DialogDescription>
+              Record training completion result for {selectedTrainee?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="overallRating">Overall Rating (1-5)</Label>
+              <div className="flex items-center gap-3">
+                <Input
+                  id="overallRating"
+                  type="number"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={newTrainingResult.overallRating?.toString() || "0"}
+                  onChange={(e) => setNewTrainingResult({
+                    ...newTrainingResult,
+                    overallRating: parseFloat(e.target.value) || 0
+                  })}
+                  className="w-20"
+                />
+                <span className="text-sm text-muted-foreground">out of 5.0</span>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="feedback">Feedback/Comments</Label>
+              <Textarea
+                id="feedback"
+                placeholder="Provide feedback on the trainee's overall performance..."
+                value={newTrainingResult.feedback || ""}
+                onChange={(e) => setNewTrainingResult({ ...newTrainingResult, feedback: e.target.value })}
+                rows={4}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="certificateIssued" className="cursor-pointer">Issue Certificate</Label>
+                <input
+                  type="checkbox"
+                  id="certificateIssued"
+                  checked={newTrainingResult.certificateIssued}
+                  onChange={(e) => setNewTrainingResult({ ...newTrainingResult, certificateIssued: e.target.checked })}
+                  className="form-checkbox h-5 w-5 text-primary focus:ring-primary border-border rounded"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Certificate number will be automatically generated if issued
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="employmentStatus">Employment Status</Label>
+              <Select
+                value={newTrainingResult.employmentStatus as string}
+                onValueChange={(value) => setNewTrainingResult({ 
+                  ...newTrainingResult, 
+                  employmentStatus: value as TrainingResult["employmentStatus"] 
+                })}
+              >
+                <SelectTrigger id="employmentStatus">
+                  <SelectValue placeholder="Select employment status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Employed">Employed</SelectItem>
+                  <SelectItem value="Unemployed">Unemployed</SelectItem>
+                  <SelectItem value="Referred">Referred</SelectItem>
+                  <SelectItem value="Unknown">Unknown</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {(newTrainingResult.employmentStatus === "Employed" || newTrainingResult.employmentStatus === "Referred") && (
+              <div className="grid gap-2">
+                <Label htmlFor="employmentDetails">Employment Details</Label>
+                <Input
+                  id="employmentDetails"
+                  placeholder={newTrainingResult.employmentStatus === "Employed" ? 
+                    "Company name and position" : 
+                    "Referred to which company/organization"
+                  }
+                  value={newTrainingResult.employmentDetails || ""}
+                  onChange={(e) => setNewTrainingResult({ 
+                    ...newTrainingResult, 
+                    employmentDetails: e.target.value 
+                  })}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddTrainingResultDialogOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={handleCreateTrainingResult}
+              disabled={createTrainingResultMutation.isPending}
+            >
+              {createTrainingResultMutation.isPending ? "Saving..." : "Save Result"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

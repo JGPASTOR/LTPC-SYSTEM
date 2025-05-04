@@ -64,7 +64,7 @@ interface EmploymentReferral {
   completionDate: string;
   employer: string;
   position: string;
-  status: "Endorsed" | "Hired" | "Pending" | "Not Qualified";
+  status: "Endorsed" | "Hired";
   contactDetails?: string;
   notes?: string;
 }
@@ -129,7 +129,7 @@ const referralSchema = z.object({
   completionDate: z.string().min(1, "Completion date is required"),
   employer: z.string().min(1, "Employer name is required"),
   position: z.string().min(1, "Position is required"),
-  status: z.enum(["Endorsed", "Hired", "Pending", "Not Qualified"]),
+  status: z.enum(["Endorsed", "Hired"]),
   contactDetails: z.string().optional(),
   notes: z.string().optional()
 });

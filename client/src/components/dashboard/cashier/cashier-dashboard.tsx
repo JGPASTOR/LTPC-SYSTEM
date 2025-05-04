@@ -41,7 +41,7 @@ interface PaymentRecord {
   courseName: string;
   trainerName: string;
   status: "Active" | "Completed" | "Dropped";
-  payment: "Paid" | "Partial" | "Unpaid";
+  payment: "Paid" | "Unpaid";
   amountDue: number;
   amountPaid: number;
   balanceDue: number;
@@ -69,10 +69,10 @@ const getPaymentRecords = (): PaymentRecord[] => [
     courseName: "Food Processing",
     trainerName: "Maria Santos",
     status: "Active",
-    payment: "Partial",
+    payment: "Unpaid",
     amountDue: 1200,
-    amountPaid: 600,
-    balanceDue: 600,
+    amountPaid: 0,
+    balanceDue: 1200,
     lastPaymentDate: "2025-04-15"
   },
   {
@@ -94,10 +94,10 @@ const getPaymentRecords = (): PaymentRecord[] => [
     courseName: "Electronics Servicing",
     trainerName: "Elena Gomez",
     status: "Active",
-    payment: "Partial",
+    payment: "Unpaid",
     amountDue: 1800,
-    amountPaid: 900,
-    balanceDue: 900,
+    amountPaid: 0,
+    balanceDue: 1800,
     lastPaymentDate: "2025-04-28"
   },
   {
@@ -250,8 +250,8 @@ export function CashierDashboard() {
         </div>
         <PaymentStatusCards
           enrollments={getPaymentRecords().sort((a, b) => {
-            // Show unpaid first, then partial, then paid
-            const paymentOrder = { "Unpaid": 0, "Partial": 1, "Paid": 2 };
+            // Show unpaid first, then paid
+            const paymentOrder = { "Unpaid": 0, "Paid": 1 };
             return paymentOrder[a.payment] - paymentOrder[b.payment];
           })}
           onView={handleViewEnrollment}

@@ -19,11 +19,10 @@ interface PaymentStatusCardsProps {
 
 export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentStatusCardsProps) {
   // Get payment status indicator
-  const getPaymentIcon = (status: "Paid" | "Partial" | "Unpaid") => {
+  const getPaymentIcon = (status: "Paid" | "Unpaid") => {
     switch (status) {
       case "Paid":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case "Partial":
       case "Unpaid":
         return <AlertCircle className="h-5 w-5 text-red-500" />;
       default:
@@ -32,11 +31,10 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
   };
 
   // Get background color based on payment status
-  const getCardClassName = (status: "Paid" | "Partial" | "Unpaid") => {
+  const getCardClassName = (status: "Paid" | "Unpaid") => {
     switch (status) {
       case "Paid":
         return "border-green-200 bg-green-50";
-      case "Partial":
       case "Unpaid":
         return "border-red-200 bg-red-50";
       default:
@@ -45,11 +43,10 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
   };
 
   // Get payment badge
-  const getPaymentBadge = (status: "Paid" | "Partial" | "Unpaid") => {
+  const getPaymentBadge = (status: "Paid" | "Unpaid") => {
     switch (status) {
       case "Paid":
         return <Badge className="bg-green-500 hover:bg-green-600">Paid</Badge>;
-      case "Partial":
       case "Unpaid":
         return <Badge variant="destructive">Pending</Badge>;
       default:
@@ -79,16 +76,14 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
             </div>
             
             <div className="space-y-2 mt-2">
-              {enrollment.payment === "Partial" && (
-                <div className="p-2 bg-red-100 rounded-md text-red-800 text-sm flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-2" /> 
-                  <span>Balance payment pending</span>
-                </div>
-              )}
-              
               <div className="flex items-center text-sm">
                 <span className="font-medium mr-2">Trainer:</span> 
                 {enrollment.trainerName}
+              </div>
+              
+              <div className="flex items-center text-sm">
+                <span className="font-medium mr-2">Amount Due:</span> 
+                ₱{enrollment.amountDue.toLocaleString()}
               </div>
               
               <div className="flex items-center text-sm">

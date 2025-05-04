@@ -8,6 +8,7 @@ import { CourseDistribution } from "@/components/dashboard/course-distribution";
 import { TrainingProgress, type CourseProgress } from "./training-progress";
 import { AssessmentResults, type AssessmentResult } from "./assessment-results";
 import { EmploymentReferrals, type EmploymentReferral } from "./employment-referrals";
+import { UserManagement } from "./user-management";
 
 // Demo data functions (in a real app, these would be API calls)
 const getMonthlyEnrollmentData = () => [
@@ -234,6 +235,9 @@ export function AdminPesdoDashboard() {
         <CourseDistribution data={getCourseDistributionData()} />
       </div>
 
+      {/* User Management */}
+      <UserManagement />
+      
       {/* Training Progress and Assessment Results */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TrainingProgress courses={getTrainingProgressData()} />

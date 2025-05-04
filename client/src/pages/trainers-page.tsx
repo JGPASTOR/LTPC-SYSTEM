@@ -43,6 +43,19 @@ interface Trainer {
   schedule?: ScheduleDay[];
 }
 
+// Default schedule for sample data
+const createSchedule = (daysAvailable: ("Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday")[]) => {
+  return [
+    { day: "Monday", startTime: "08:00", endTime: "17:00", available: daysAvailable.includes("Monday") },
+    { day: "Tuesday", startTime: "08:00", endTime: "17:00", available: daysAvailable.includes("Tuesday") },
+    { day: "Wednesday", startTime: "09:00", endTime: "18:00", available: daysAvailable.includes("Wednesday") },
+    { day: "Thursday", startTime: "08:00", endTime: "17:00", available: daysAvailable.includes("Thursday") },
+    { day: "Friday", startTime: "08:00", endTime: "16:00", available: daysAvailable.includes("Friday") },
+    { day: "Saturday", startTime: "08:00", endTime: "12:00", available: daysAvailable.includes("Saturday") },
+    { day: "Sunday", startTime: "09:00", endTime: "12:00", available: daysAvailable.includes("Sunday") }
+  ] as ScheduleDay[];
+};
+
 // Sample trainers data
 const sampleTrainers: Trainer[] = [
   {
@@ -53,7 +66,8 @@ const sampleTrainers: Trainer[] = [
     phone: "09123456789",
     bio: "Experienced web developer with 5 years of teaching experience specializing in HTML, CSS, JavaScript and React.",
     activeCourses: 2,
-    totalTrainees: 24
+    totalTrainees: 24,
+    schedule: createSchedule(["Monday", "Tuesday", "Thursday", "Friday"])
   },
   {
     id: "TR002",
@@ -172,6 +186,85 @@ export default function TrainersPage() {
       .toUpperCase();
   };
 
+  // Handle schedule update for a specific day
+  const handleScheduleUpdate = (index: number, field: keyof ScheduleDay, value: any) => {
+    const updatedSchedule = [...newTrainer.schedule];
+    updatedSchedule[index] = {
+      ...updatedSchedule[index],
+      [field]: value
+    };
+    setNewTrainer({
+      ...newTrainer,
+      schedule: updatedSchedule
+    });
+  };
+
+  // Trainer Schedule Component
+  const TrainerSchedule = () => {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-medium">Weekly Schedule</h3>
+          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-green-500 mr-1"></div>
+              <span>Available</span>
+            </div>
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-gray-300 mr-1"></div>
+              <span>Unavailable</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          {newTrainer.schedule.map((day, index) => (
+            <div key={day.day} className="grid grid-cols-12 items-center gap-2 p-2 rounded-md border">
+              <div className="col-span-2 font-medium">{day.day}</div>
+              
+              <div className="col-span-9 flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm">
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor={`${day.day}-start`} className="sr-only">Start Time</Label>
+                      <Input
+                        id={`${day.day}-start`}
+                        type="time"
+                        className="h-8"
+                        value={day.startTime}
+                        onChange={(e) => handleScheduleUpdate(index, 'startTime', e.target.value)}
+                        disabled={!day.available}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`${day.day}-end`} className="sr-only">End Time</Label>
+                      <Input
+                        id={`${day.day}-end`}
+                        type="time"
+                        className="h-8"
+                        value={day.endTime}
+                        onChange={(e) => handleScheduleUpdate(index, 'endTime', e.target.value)}
+                        disabled={!day.available}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="col-span-1 flex justify-end">
+                <Switch
+                  checked={day.available}
+                  onCheckedChange={(checked) => handleScheduleUpdate(index, 'available', checked)}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
@@ -198,7 +291,7 @@ export default function TrainersPage() {
                     Enter the trainer information below.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
                   <div className="grid gap-2">
                     <Label htmlFor="name">Full Name</Label>
                     <Input
@@ -245,6 +338,19 @@ export default function TrainersPage() {
                       placeholder="Enter trainer biography"
                       rows={4}
                     />
+                  </div>
+                  
+                  <Separator className="my-2" />
+                  
+                  <div className="grid gap-2">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <Label className="font-medium text-base">Availability Schedule</Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Set the trainer's weekly availability for classes and training sessions.
+                    </p>
+                    <TrainerSchedule />
                   </div>
                 </div>
                 <DialogFooter>
@@ -418,6 +524,34 @@ export default function TrainersPage() {
                     </div>
                   </div>
                 </div>
+                
+                {selectedTrainer.schedule && (
+                  <div>
+                    <div className="flex items-center mb-2">
+                      <Calendar className="h-4 w-4 mr-1.5 text-primary" />
+                      <p className="text-sm font-medium">Weekly Schedule</p>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      {selectedTrainer.schedule.filter(day => day.available).map(day => (
+                        <div key={day.day} className="flex justify-between items-center border rounded p-2">
+                          <div className="font-medium">{day.day}</div>
+                          <div className="text-muted-foreground">
+                            {day.startTime} - {day.endTime}
+                          </div>
+                          <div className="flex items-center text-xs">
+                            <div className="h-2 w-2 rounded-full bg-green-500 mr-1"></div>
+                            <span>Available</span>
+                          </div>
+                        </div>
+                      ))}
+                      {!selectedTrainer.schedule.some(day => day.available) && (
+                        <p className="text-muted-foreground text-center italic py-2">
+                          No availability scheduled
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

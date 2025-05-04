@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -131,8 +132,9 @@ export default function ReportsPage() {
     from: new Date(2023, 0, 1),
     to: new Date()
   });
-  const [reportType, setReportType] = useState("enrollment");
+  const [reportType, setReportType] = useState("payment");
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Chart colors
   const COLORS = [
@@ -203,57 +205,115 @@ export default function ReportsPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center space-x-2">
-                  <div className="p-2 rounded-full bg-primary/10">
-                    <Users className="h-5 w-5 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg">Total Trainees</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">756</div>
-                <p className="text-muted-foreground text-sm flex items-center">
-                  <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
-                  <span className="text-green-600 font-medium">12%</span> increase from last year
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center space-x-2">
-                  <div className="p-2 rounded-full bg-secondary/10">
-                    <GraduationCap className="h-5 w-5 text-secondary" />
-                  </div>
-                  <CardTitle className="text-lg">Completion Rate</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">85%</div>
-                <p className="text-muted-foreground text-sm flex items-center">
-                  <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
-                  <span className="text-green-600 font-medium">5%</span> increase from last year
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center space-x-2">
-                  <div className="p-2 rounded-full bg-accent/10">
-                    <Wallet className="h-5 w-5 text-accent" />
-                  </div>
-                  <CardTitle className="text-lg">Total Revenue</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">₱245,830</div>
-                <p className="text-muted-foreground text-sm flex items-center">
-                  <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
-                  <span className="text-green-600 font-medium">8%</span> increase from last year
-                </p>
-              </CardContent>
-            </Card>
+            {user?.role === "cashier" ? (
+              <>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 rounded-full bg-green-100">
+                        <Wallet className="h-5 w-5 text-green-600" />
+                      </div>
+                      <CardTitle className="text-lg">Total Collections</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">₱245,830</div>
+                    <p className="text-muted-foreground text-sm flex items-center">
+                      <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
+                      <span className="text-green-600 font-medium">8%</span> increase from last month
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 rounded-full bg-red-100">
+                        <FileClock className="h-5 w-5 text-red-600" />
+                      </div>
+                      <CardTitle className="text-lg">Pending Payments</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">₱86,420</div>
+                    <p className="text-muted-foreground text-sm flex items-center">
+                      <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
+                      <span className="text-green-600 font-medium">5%</span> decrease from last month
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 rounded-full bg-blue-100">
+                        <Receipt className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <CardTitle className="text-lg">Receipts Generated</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">156</div>
+                    <p className="text-muted-foreground text-sm flex items-center">
+                      <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
+                      <span className="text-green-600 font-medium">12%</span> increase from last month
+                    </p>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 rounded-full bg-primary/10">
+                        <Users className="h-5 w-5 text-primary" />
+                      </div>
+                      <CardTitle className="text-lg">Total Trainees</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">756</div>
+                    <p className="text-muted-foreground text-sm flex items-center">
+                      <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
+                      <span className="text-green-600 font-medium">12%</span> increase from last year
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 rounded-full bg-secondary/10">
+                        <GraduationCap className="h-5 w-5 text-secondary" />
+                      </div>
+                      <CardTitle className="text-lg">Completion Rate</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">85%</div>
+                    <p className="text-muted-foreground text-sm flex items-center">
+                      <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
+                      <span className="text-green-600 font-medium">5%</span> increase from last year
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 rounded-full bg-accent/10">
+                        <Wallet className="h-5 w-5 text-accent" />
+                      </div>
+                      <CardTitle className="text-lg">Total Revenue</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">₱245,830</div>
+                    <p className="text-muted-foreground text-sm flex items-center">
+                      <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
+                      <span className="text-green-600 font-medium">8%</span> increase from last year
+                    </p>
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </div>
           
           <div className="flex flex-col gap-6 mb-6">
@@ -272,10 +332,16 @@ export default function ReportsPage() {
                           <SelectValue placeholder="Select report" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="enrollment">Enrollment Report</SelectItem>
-                          <SelectItem value="completion">Completion Report</SelectItem>
-                          <SelectItem value="payment">Payment Report</SelectItem>
-                          <SelectItem value="employment">Employment Report</SelectItem>
+                          {user?.role === "cashier" ? (
+                            <SelectItem value="payment">Payment Report</SelectItem>
+                          ) : (
+                            <>
+                              <SelectItem value="enrollment">Enrollment Report</SelectItem>
+                              <SelectItem value="completion">Completion Report</SelectItem>
+                              <SelectItem value="payment">Payment Report</SelectItem>
+                              <SelectItem value="employment">Employment Report</SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>

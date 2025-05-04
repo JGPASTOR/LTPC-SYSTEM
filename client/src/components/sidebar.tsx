@@ -93,10 +93,11 @@ export function Sidebar() {
           </>
         )}
         
-        {/* Cashier can access payments only */}
+        {/* Cashier can access payments and reports */}
         {user?.role === "cashier" && (
           <>
             <NavItem href="/payments" icon={Wallet}>Payments</NavItem>
+            <NavItem href="/reports" icon={FileText}>Reports</NavItem>
           </>
         )}
       </nav>

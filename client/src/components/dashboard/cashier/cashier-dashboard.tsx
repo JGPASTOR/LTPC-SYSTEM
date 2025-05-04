@@ -1,15 +1,16 @@
-import { Wallet, FileClock, Receipt } from "lucide-react";
+import { Wallet, FileClock, Receipt, AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { EnrollmentTable, Enrollment } from "@/components/enrollments/enrollment-table";
 import { RecentActivities, Activity } from "@/components/dashboard/recent-activities";
+import { PaymentStatusCards } from "./payment-status-cards";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Table,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Payment summary interface
 interface PaymentSummary {
@@ -32,8 +34,23 @@ interface PaymentSummary {
   unpaidCount: number;
 }
 
+// Payment record interface
+interface PaymentRecord {
+  id: string;
+  traineeName: string;
+  traineeInitials: string;
+  courseName: string;
+  trainerName: string;
+  status: "Active" | "Completed" | "Dropped";
+  payment: "Paid" | "Partial" | "Unpaid";
+  amountDue: number;
+  amountPaid: number;
+  balanceDue: number;
+  lastPaymentDate?: string;
+}
+
 // Demo data for cashier dashboard
-const getEnrollmentsWithPaymentStatus = (): Enrollment[] => [
+const getPaymentRecords = (): PaymentRecord[] => [
   {
     id: "enr1",
     traineeName: "John Smith",
@@ -41,7 +58,10 @@ const getEnrollmentsWithPaymentStatus = (): Enrollment[] => [
     courseName: "Welding Technology",
     trainerName: "Juan Dela Cruz",
     status: "Active",
-    payment: "Unpaid"
+    payment: "Unpaid",
+    amountDue: 1500,
+    amountPaid: 0,
+    balanceDue: 1500
   },
   {
     id: "enr2",
@@ -50,7 +70,11 @@ const getEnrollmentsWithPaymentStatus = (): Enrollment[] => [
     courseName: "Food Processing",
     trainerName: "Maria Santos",
     status: "Active",
-    payment: "Partial"
+    payment: "Partial",
+    amountDue: 1200,
+    amountPaid: 600,
+    balanceDue: 600,
+    lastPaymentDate: "2025-04-15"
   },
   {
     id: "enr3",
@@ -59,7 +83,10 @@ const getEnrollmentsWithPaymentStatus = (): Enrollment[] => [
     courseName: "Automotive Servicing",
     trainerName: "Roberto Reyes",
     status: "Active",
-    payment: "Unpaid"
+    payment: "Unpaid",
+    amountDue: 2000,
+    amountPaid: 0,
+    balanceDue: 2000
   },
   {
     id: "enr4",
@@ -68,7 +95,11 @@ const getEnrollmentsWithPaymentStatus = (): Enrollment[] => [
     courseName: "Electronics Servicing",
     trainerName: "Elena Gomez",
     status: "Active",
-    payment: "Partial"
+    payment: "Partial",
+    amountDue: 1800,
+    amountPaid: 900,
+    balanceDue: 900,
+    lastPaymentDate: "2025-04-28"
   },
   {
     id: "enr5",
@@ -77,7 +108,11 @@ const getEnrollmentsWithPaymentStatus = (): Enrollment[] => [
     courseName: "Carpentry",
     trainerName: "Pedro Reyes",
     status: "Active",
-    payment: "Paid"
+    payment: "Paid",
+    amountDue: 1200,
+    amountPaid: 1200,
+    balanceDue: 0,
+    lastPaymentDate: "2025-05-02"
   }
 ];
 
@@ -202,17 +237,33 @@ export function CashierDashboard() {
         />
       </div>
 
-      {/* Enrollments with Payment Status */}
+      {/* Payment Status Cards */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Payment Status</h2>
-        <EnrollmentTable
-          enrollments={getEnrollmentsWithPaymentStatus().sort((a, b) => {
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Payment Status</h2>
+          <div className="flex gap-2 text-sm">
+            <div className="flex items-center mr-3">
+              <div className="h-3 w-3 rounded-full bg-red-500 mr-1"></div>
+              <span>Unpaid</span>
+            </div>
+            <div className="flex items-center mr-3">
+              <div className="h-3 w-3 rounded-full bg-amber-500 mr-1"></div>
+              <span className="font-medium">Partial</span>
+            </div>
+            <div className="flex items-center">
+              <div className="h-3 w-3 rounded-full bg-green-500 mr-1"></div>
+              <span>Paid</span>
+            </div>
+          </div>
+        </div>
+        <PaymentStatusCards
+          enrollments={getPaymentRecords().sort((a, b) => {
             // Show unpaid first, then partial, then paid
             const paymentOrder = { "Unpaid": 0, "Partial": 1, "Paid": 2 };
             return paymentOrder[a.payment] - paymentOrder[b.payment];
           })}
           onView={handleViewEnrollment}
-          onEdit={handleEditEnrollment}
+          onRecord={handleEditEnrollment}
         />
       </div>
       

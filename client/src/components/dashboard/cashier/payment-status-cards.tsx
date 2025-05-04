@@ -1,0 +1,131 @@
+import {
+  Card,
+  CardContent,
+  CardFooter
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Wallet, AlertCircle, CheckCircle, Clock, ArrowRight } from "lucide-react";
+
+// Use the Enrollment type but we'll only use relevant fields
+import { Enrollment } from "@/components/enrollments/enrollment-table";
+
+interface PaymentStatusCardsProps {
+  enrollments: Enrollment[];
+  onView: (id: string) => void;
+  onRecord: (id: string) => void;
+}
+
+export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentStatusCardsProps) {
+  // Get payment status indicator
+  const getPaymentIcon = (status: "Paid" | "Partial" | "Unpaid") => {
+    switch (status) {
+      case "Paid":
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case "Partial":
+        return <Clock className="h-5 w-5 text-amber-500" />;
+      case "Unpaid":
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
+  // Get background color based on payment status
+  const getCardClassName = (status: "Paid" | "Partial" | "Unpaid") => {
+    switch (status) {
+      case "Paid":
+        return "border-green-200 bg-green-50";
+      case "Partial":
+        return "border-amber-200 bg-amber-50";
+      case "Unpaid":
+        return "border-red-200 bg-red-50";
+      default:
+        return "";
+    }
+  };
+
+  // Get payment badge
+  const getPaymentBadge = (status: "Paid" | "Partial" | "Unpaid") => {
+    switch (status) {
+      case "Paid":
+        return <Badge className="bg-green-500 hover:bg-green-600">Paid</Badge>;
+      case "Partial":
+        return <Badge className="bg-amber-500 hover:bg-amber-600">Partial</Badge>;
+      case "Unpaid":
+        return <Badge variant="destructive">Unpaid</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      {enrollments.map((enrollment) => (
+        <Card 
+          key={enrollment.id} 
+          className={`${getCardClassName(enrollment.payment)} transition-all hover:shadow-md`}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <Avatar className="h-9 w-9 mr-2">
+                  <AvatarFallback>{enrollment.traineeInitials}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h4 className="font-medium">{enrollment.traineeName}</h4>
+                  <p className="text-sm text-muted-foreground">{enrollment.courseName}</p>
+                </div>
+              </div>
+              {getPaymentBadge(enrollment.payment)}
+            </div>
+            
+            <div className="space-y-2 mt-2">
+              {enrollment.payment === "Partial" && (
+                <div className="p-2 bg-amber-100 rounded-md text-amber-800 text-sm flex items-center">
+                  <Clock className="h-4 w-4 mr-2" /> 
+                  <span>Partial payment received. Remaining balance due.</span>
+                </div>
+              )}
+              
+              <div className="flex items-center text-sm">
+                <span className="font-medium mr-2">Trainer:</span> 
+                {enrollment.trainerName}
+              </div>
+              
+              <div className="flex items-center text-sm">
+                <span className="font-medium mr-2">Payment Status:</span>
+                <div className="flex items-center">
+                  {getPaymentIcon(enrollment.payment)}
+                  <span className="ml-1">{enrollment.payment}</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+          
+          <CardFooter className="p-4 pt-0 flex justify-between border-t mt-4">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => onView(enrollment.id)}
+            >
+              View Details
+            </Button>
+            
+            {enrollment.payment !== "Paid" && (
+              <Button 
+                size="sm"
+                onClick={() => onRecord(enrollment.id)}
+                className={enrollment.payment === "Partial" ? "bg-amber-500 hover:bg-amber-600" : ""}
+              >
+                {enrollment.payment === "Partial" ? "Complete Payment" : "Record Payment"}
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  );
+}

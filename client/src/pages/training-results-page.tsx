@@ -68,6 +68,7 @@ interface TrainingResult {
   enrollmentDate: string;
   completionDate: string;
   overallRating: number;
+  result: "Pass" | "Fail";
   feedback: string;
   certificateIssued: boolean;
   certificateNumber?: string;
@@ -86,6 +87,7 @@ const sampleTrainingResults: TrainingResult[] = [
     enrollmentDate: "2023-02-15",
     completionDate: "2023-08-01",
     overallRating: 4.8,
+    result: "Pass",
     feedback: "Elena has shown exceptional skills in culinary arts and food preparation. Her final project impressed all judges.",
     certificateIssued: true,
     certificateNumber: "CERT-2023-0001",
@@ -101,6 +103,7 @@ const sampleTrainingResults: TrainingResult[] = [
     enrollmentDate: "2023-01-20",
     completionDate: "2023-07-15",
     overallRating: 4.2,
+    result: "Pass",
     feedback: "Carlos demonstrated good technical knowledge and problem-solving skills throughout the course. He needs more practice with modern diagnostic tools.",
     certificateIssued: true,
     certificateNumber: "CERT-2023-0002",
@@ -116,6 +119,7 @@ const sampleTrainingResults: TrainingResult[] = [
     enrollmentDate: "2023-03-10",
     completionDate: "2023-08-05",
     overallRating: 4.5,
+    result: "Pass",
     feedback: "Sofia has excellent welding skills and attention to detail. She consistently produced high-quality work.",
     certificateIssued: true,
     certificateNumber: "CERT-2023-0003",
@@ -131,6 +135,7 @@ const sampleTrainingResults: TrainingResult[] = [
     enrollmentDate: "2023-02-01",
     completionDate: "2023-07-30",
     overallRating: 3.7,
+    result: "Fail",
     feedback: "Miguel has good theoretical knowledge but needs more hands-on practice. His troubleshooting skills improved significantly over the course.",
     certificateIssued: true,
     certificateNumber: "CERT-2023-0004",
@@ -145,6 +150,7 @@ const sampleTrainingResults: TrainingResult[] = [
     enrollmentDate: "2023-04-05",
     completionDate: "2023-08-10",
     overallRating: 4.9,
+    result: "Pass",
     feedback: "Ana demonstrated exceptional creativity and craftsmanship. Her final project exceeded expectations in quality and design.",
     certificateIssued: false,
     employmentStatus: "Unknown"
@@ -186,6 +192,19 @@ const CertificateBadge = ({ issued }: { issued: boolean }) => {
       </Badge>
     : <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 flex items-center gap-1">
         <span>Pending</span>
+      </Badge>;
+};
+
+// Result badge component
+const ResultBadge = ({ result }: { result: TrainingResult["result"] }) => {
+  return result === "Pass"
+    ? <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 flex items-center gap-1">
+        <CheckCircle className="h-3 w-3" />
+        <span>Pass</span>
+      </Badge>
+    : <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300 flex items-center gap-1">
+        <X className="h-3 w-3" />
+        <span>Fail</span>
       </Badge>;
 };
 
@@ -374,6 +393,7 @@ export default function TrainingResultsPage() {
                       <TableHead>Enrolled Date</TableHead>
                       <TableHead>Completion Date</TableHead>
                       <TableHead>Grade</TableHead>
+                      <TableHead>Result</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -387,6 +407,9 @@ export default function TrainingResultsPage() {
                         <TableCell>{new Date(result.completionDate).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <span className="font-medium">{Math.round(result.overallRating * 20)}</span>
+                        </TableCell>
+                        <TableCell>
+                          <ResultBadge result={result.result} />
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>

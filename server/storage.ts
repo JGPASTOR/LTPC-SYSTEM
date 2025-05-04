@@ -3,7 +3,9 @@ import {
   courses, 
   trainers, 
   trainees, 
-  payments, 
+  payments,
+  assessments,
+  trainingResults,
   type User, 
   type InsertUser,
   type Course,
@@ -13,7 +15,11 @@ import {
   type Trainee,
   type InsertTrainee,
   type Payment,
-  type InsertPayment
+  type InsertPayment,
+  type Assessment,
+  type InsertAssessment,
+  type TrainingResult,
+  type InsertTrainingResult
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -60,6 +66,20 @@ export interface IStorage {
   getPayment(id: number): Promise<Payment | undefined>;
   createPayment(payment: InsertPayment): Promise<Payment>;
   
+  // Assessment methods
+  getAllAssessments(): Promise<Assessment[]>;
+  getAssessmentsByTraineeId(traineeId: string): Promise<Assessment[]>;
+  getAssessment(id: number): Promise<Assessment | undefined>;
+  createAssessment(assessment: InsertAssessment): Promise<Assessment>;
+  updateAssessment(id: number, assessment: Partial<Assessment>): Promise<Assessment | undefined>;
+  
+  // Training Results methods
+  getAllTrainingResults(): Promise<TrainingResult[]>;
+  getTrainingResultByTraineeId(traineeId: string): Promise<TrainingResult | undefined>;
+  getTrainingResult(id: number): Promise<TrainingResult | undefined>;
+  createTrainingResult(result: InsertTrainingResult): Promise<TrainingResult>;
+  updateTrainingResult(id: number, result: Partial<TrainingResult>): Promise<TrainingResult | undefined>;
+  
   // Dashboard and reports
   getDashboardStats(): Promise<any>;
   getReportData(type: string, from?: string, to?: string): Promise<any>;
@@ -75,6 +95,8 @@ export class MemStorage implements IStorage {
   private trainers: Map<number, Trainer>;
   private trainees: Map<number, Trainee>;
   private payments: Map<number, Payment>;
+  private assessments: Map<number, Assessment>;
+  private trainingResults: Map<number, TrainingResult>;
   sessionStore: session.Store;
   
   private userCurrentId: number;
@@ -82,6 +104,8 @@ export class MemStorage implements IStorage {
   private trainerCurrentId: number;
   private traineeCurrentId: number;
   private paymentCurrentId: number;
+  private assessmentCurrentId: number;
+  private trainingResultCurrentId: number;
 
   constructor() {
     this.users = new Map();
@@ -89,12 +113,16 @@ export class MemStorage implements IStorage {
     this.trainers = new Map();
     this.trainees = new Map();
     this.payments = new Map();
+    this.assessments = new Map();
+    this.trainingResults = new Map();
     
     this.userCurrentId = 1;
     this.courseCurrentId = 1;
     this.trainerCurrentId = 1;
     this.traineeCurrentId = 1;
     this.paymentCurrentId = 1;
+    this.assessmentCurrentId = 1;
+    this.trainingResultCurrentId = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000 // 24 hours
@@ -267,6 +295,90 @@ export class MemStorage implements IStorage {
     };
   }
   
+  // Assessment methods
+  async getAllAssessments(): Promise<Assessment[]> {
+    return Array.from(this.assessments.values());
+  }
+  
+  async getAssessmentsByTraineeId(traineeId: string): Promise<Assessment[]> {
+    return Array.from(this.assessments.values()).filter(
+      assessment => assessment.traineeId === traineeId
+    );
+  }
+  
+  async getAssessment(id: number): Promise<Assessment | undefined> {
+    return this.assessments.get(id);
+  }
+  
+  async createAssessment(assessment: InsertAssessment): Promise<Assessment> {
+    const id = this.assessmentCurrentId++;
+    const newAssessment: Assessment = { 
+      ...assessment, 
+      id,
+      createdAt: new Date().toISOString()
+    };
+    this.assessments.set(id, newAssessment);
+    return newAssessment;
+  }
+  
+  async updateAssessment(id: number, assessmentData: Partial<Assessment>): Promise<Assessment | undefined> {
+    const assessment = this.assessments.get(id);
+    if (!assessment) return undefined;
+    
+    const updatedAssessment = { ...assessment, ...assessmentData };
+    this.assessments.set(id, updatedAssessment);
+    
+    return updatedAssessment;
+  }
+  
+  // Training Results methods
+  async getAllTrainingResults(): Promise<TrainingResult[]> {
+    return Array.from(this.trainingResults.values());
+  }
+  
+  async getTrainingResultByTraineeId(traineeId: string): Promise<TrainingResult | undefined> {
+    return Array.from(this.trainingResults.values()).find(
+      result => result.traineeId === traineeId
+    );
+  }
+  
+  async getTrainingResult(id: number): Promise<TrainingResult | undefined> {
+    return this.trainingResults.get(id);
+  }
+  
+  async createTrainingResult(result: InsertTrainingResult): Promise<TrainingResult> {
+    const id = this.trainingResultCurrentId++;
+    const certificateNumber = result.certificateIssued ? 
+      `CERT-${new Date().getFullYear()}-${id.toString().padStart(4, '0')}` : 
+      undefined;
+      
+    const newTrainingResult: TrainingResult = { 
+      ...result, 
+      id,
+      certificateNumber,
+      createdAt: new Date().toISOString()
+    };
+    
+    this.trainingResults.set(id, newTrainingResult);
+    return newTrainingResult;
+  }
+  
+  async updateTrainingResult(id: number, resultData: Partial<TrainingResult>): Promise<TrainingResult | undefined> {
+    const result = this.trainingResults.get(id);
+    if (!result) return undefined;
+    
+    // Generate certificate number if newly issued
+    let updatedData = { ...resultData };
+    if (resultData.certificateIssued && !result.certificateIssued) {
+      updatedData.certificateNumber = `CERT-${new Date().getFullYear()}-${id.toString().padStart(4, '0')}`;
+    }
+    
+    const updatedResult = { ...result, ...updatedData };
+    this.trainingResults.set(id, updatedResult);
+    
+    return updatedResult;
+  }
+
   async getReportData(type: string, from?: string, to?: string): Promise<any> {
     // This would filter based on dates in a real implementation
     switch (type) {
@@ -296,6 +408,31 @@ export class MemStorage implements IStorage {
           amount: payment.amount,
           receiptNumber: payment.receiptNumber,
           paymentDate: payment.createdAt
+        }));
+        
+      case 'assessment':
+        return Array.from(this.assessments.values()).map(assessment => ({
+          id: assessment.id,
+          traineeId: assessment.traineeId,
+          traineeName: assessment.traineeName,
+          course: assessment.course,
+          assessmentType: assessment.assessmentType,
+          score: assessment.score,
+          maxScore: assessment.maxScore,
+          result: assessment.result,
+          assessmentDate: assessment.assessmentDate
+        }));
+        
+      case 'training_results':
+        return Array.from(this.trainingResults.values()).map(result => ({
+          id: result.id,
+          traineeId: result.traineeId,
+          traineeName: result.traineeName,
+          course: result.course,
+          overallRating: result.overallRating,
+          certificateIssued: result.certificateIssued,
+          certificateNumber: result.certificateNumber,
+          issuedDate: result.issuedDate
         }));
         
       default:

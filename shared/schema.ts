@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, date, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, date, timestamp, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -127,5 +127,73 @@ export type InsertTrainer = z.infer<typeof insertTrainerSchema>;
 export type Trainee = typeof trainees.$inferSelect;
 export type InsertTrainee = z.infer<typeof insertTraineeSchema>;
 
+// Assessment Results schema
+export const assessments = pgTable("assessments", {
+  id: serial("id").primaryKey(),
+  traineeId: text("trainee_id").notNull(),
+  traineeName: text("trainee_name").notNull(),
+  courseId: integer("course_id").notNull(),
+  course: text("course").notNull(),
+  assessmentType: text("assessment_type").notNull(), // Theoretical, Practical, Final
+  score: real("score").notNull(),
+  maxScore: real("max_score").notNull(),
+  result: text("result").notNull(), // Passed, Failed, Conditionally Passed
+  feedback: text("feedback"),
+  assessedBy: text("assessed_by").notNull(),
+  assessmentDate: date("assessment_date").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertAssessmentSchema = createInsertSchema(assessments).pick({
+  traineeId: true,
+  traineeName: true,
+  courseId: true,
+  course: true,
+  assessmentType: true,
+  score: true,
+  maxScore: true,
+  result: true,
+  feedback: true,
+  assessedBy: true,
+  assessmentDate: true,
+});
+
+// Training Results schema
+export const trainingResults = pgTable("training_results", {
+  id: serial("id").primaryKey(),
+  traineeId: text("trainee_id").notNull(),
+  traineeName: text("trainee_name").notNull(),
+  courseId: integer("course_id").notNull(),
+  course: text("course").notNull(),
+  competencies: text("competencies").notNull(),
+  overallRating: real("overall_rating").notNull(),
+  certificateIssued: boolean("certificate_issued").notNull().default(false),
+  certificateNumber: text("certificate_number").unique(),
+  issuedDate: date("issued_date"),
+  remarks: text("remarks"),
+  approvedBy: text("approved_by"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertTrainingResultSchema = createInsertSchema(trainingResults).pick({
+  traineeId: true,
+  traineeName: true,
+  courseId: true,
+  course: true,
+  competencies: true,
+  overallRating: true,
+  certificateIssued: true,
+  certificateNumber: true,
+  issuedDate: true,
+  remarks: true,
+  approvedBy: true,
+});
+
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+
+export type Assessment = typeof assessments.$inferSelect;
+export type InsertAssessment = z.infer<typeof insertAssessmentSchema>;
+
+export type TrainingResult = typeof trainingResults.$inferSelect;
+export type InsertTrainingResult = z.infer<typeof insertTrainingResultSchema>;

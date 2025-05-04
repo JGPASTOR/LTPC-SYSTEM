@@ -135,7 +135,7 @@ export default function ReportsPage() {
     from: new Date(2023, 0, 1),
     to: new Date()
   });
-  const [reportType, setReportType] = useState("payment");
+  const [reportType, setReportType] = useState("monthly");
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -746,8 +746,8 @@ export default function ReportsPage() {
                   
                   <TabsContent value="table" className="w-full">
                     <div className="overflow-x-auto">
-                      {reportType === "annual" && (
-                        <AnnualSummaryReport />
+                      {reportType === "monthly" && (
+                        <MonthlyTrainingReport />
                       )}
                       
                       {reportType === "enrollment" && (

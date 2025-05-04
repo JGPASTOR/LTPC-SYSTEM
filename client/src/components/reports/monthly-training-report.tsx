@@ -356,21 +356,21 @@ const MonthlyTrainingReport: React.FC = () => {
   const availableMonths = Object.keys(monthlyReports);
 
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <Card className="w-full border-primary/20 shadow-md">
+      <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
         <div className="flex flex-col space-y-2 md:flex-row md:justify-between md:items-center">
           <div>
-            <CardTitle className="text-lg sm:text-xl">
+            <CardTitle className="text-xl sm:text-2xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-bold">
               LTPC Monthly Training and Employment Report
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-muted-foreground mt-1">
               Summary of training programs and employment outcomes for {reportData?.month} {reportData?.year}
             </CardDescription>
           </div>
           <div className="flex items-center space-x-2 mt-2 md:mt-0">
-            <Label htmlFor="month-select">Select Month:</Label>
+            <Label htmlFor="month-select" className="font-medium">Select Month:</Label>
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger id="month-select" className="w-[180px]">
+              <SelectTrigger id="month-select" className="w-[180px] border-primary/20 focus:ring-primary/30">
                 <SelectValue placeholder="Select month" />
               </SelectTrigger>
               <SelectContent>
@@ -490,69 +490,180 @@ const MonthlyTrainingReport: React.FC = () => {
         </Table>
         
         {reportData?.courses.length > 0 && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-muted/30 p-4 rounded-md">
-              <h3 className="font-medium text-lg mb-2">Summary Statistics</h3>
-              <ul className="space-y-2">
-                <li className="flex justify-between">
-                  <span>Total Trainees:</span>
-                  <span className="font-bold">{totals.totalEnrolled}</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Completion Rate:</span>
-                  <span className="font-bold">
-                    {totals.totalFinished === 0 ? 0 : Math.round((totals.totalFinished / totals.totalEnrolled) * 100)}%
-                  </span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Employment Rate:</span>
-                  <span className="font-bold">{totalOverallPercentage}%</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Gender Distribution:</span>
-                  <span className="font-bold">
-                    Male: {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalMale / totals.totalEnrolled) * 100)}% | 
-                    Female: {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalFemale / totals.totalEnrolled) * 100)}%
-                  </span>
-                </li>
-              </ul>
-            </div>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="border-primary/20 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5 pb-3">
+                <CardTitle className="text-lg font-semibold">
+                  Summary Statistics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 mt-1">
+                  <li className="flex justify-between items-center p-2 rounded hover:bg-muted/50 transition-colors">
+                    <span className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-primary" /> 
+                      Total Trainees:
+                    </span>
+                    <Badge variant="outline" className="font-bold text-sm px-3">
+                      {totals.totalEnrolled}
+                    </Badge>
+                  </li>
+                  <li className="flex justify-between items-center p-2 rounded hover:bg-muted/50 transition-colors">
+                    <span className="flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4 text-secondary" /> 
+                      Completion Rate:
+                    </span>
+                    <Badge 
+                      variant="secondary" 
+                      className={`font-bold text-sm px-3 ${
+                        (totals.totalFinished / totals.totalEnrolled) * 100 >= 90 
+                          ? "bg-green-100 text-green-700" 
+                          : ""
+                      }`}
+                    >
+                      {totals.totalFinished === 0 ? 0 : Math.round((totals.totalFinished / totals.totalEnrolled) * 100)}%
+                    </Badge>
+                  </li>
+                  <li className="flex justify-between items-center p-2 rounded hover:bg-muted/50 transition-colors">
+                    <span className="flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 text-accent" /> 
+                      Employment Rate:
+                    </span>
+                    <Badge 
+                      variant="secondary" 
+                      className={`font-bold text-sm px-3 ${
+                        totalOverallPercentage >= 90 
+                          ? "bg-green-100 text-green-700" 
+                          : ""
+                      }`}
+                    >
+                      {totalOverallPercentage}%
+                    </Badge>
+                  </li>
+                  <li className="flex justify-between items-center p-2 rounded hover:bg-muted/50 transition-colors">
+                    <span className="flex items-center gap-2">
+                      <UserCircle className="h-4 w-4 text-blue-500" /> 
+                      Gender Distribution:
+                    </span>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        Male: {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalMale / totals.totalEnrolled) * 100)}%
+                      </Badge>
+                      <Badge variant="outline" className="bg-pink-50 text-pink-700 border-pink-200">
+                        Female: {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalFemale / totals.totalEnrolled) * 100)}%
+                      </Badge>
+                    </div>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
             
-            <div className="bg-muted/30 p-4 rounded-md">
-              <h3 className="font-medium text-lg mb-2">Age Demographics</h3>
-              <ul className="space-y-2">
-                <li className="flex justify-between">
-                  <span>Below 18:</span>
-                  <span className="font-bold">
-                    {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalBelow18 / totals.totalEnrolled) * 100)}%
-                  </span>
-                </li>
-                <li className="flex justify-between">
-                  <span>18-25:</span>
-                  <span className="font-bold">
-                    {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAge18To25 / totals.totalEnrolled) * 100)}%
-                  </span>
-                </li>
-                <li className="flex justify-between">
-                  <span>26-35:</span>
-                  <span className="font-bold">
-                    {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAge26To35 / totals.totalEnrolled) * 100)}%
-                  </span>
-                </li>
-                <li className="flex justify-between">
-                  <span>36-45:</span>
-                  <span className="font-bold">
-                    {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAge36To45 / totals.totalEnrolled) * 100)}%
-                  </span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Above 45:</span>
-                  <span className="font-bold">
-                    {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAbove45 / totals.totalEnrolled) * 100)}%
-                  </span>
-                </li>
-              </ul>
-            </div>
+            <Card className="border-primary/20 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5 pb-3">
+                <CardTitle className="text-lg font-semibold">
+                  Age Demographics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 mt-1">
+                  <li className="flex justify-between items-center p-2 rounded hover:bg-muted/50 transition-colors">
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-purple-500" /> 
+                      Below 18:
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 bg-muted rounded-full h-2">
+                        <div 
+                          className="bg-purple-500 h-2 rounded-full" 
+                          style={{ 
+                            width: `${totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalBelow18 / totals.totalEnrolled) * 100)}%` 
+                          }}
+                        />
+                      </div>
+                      <Badge variant="outline" className="font-bold text-sm px-3">
+                        {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalBelow18 / totals.totalEnrolled) * 100)}%
+                      </Badge>
+                    </div>
+                  </li>
+                  <li className="flex justify-between items-center p-2 rounded hover:bg-muted/50 transition-colors">
+                    <span className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-blue-500" /> 
+                      18-25:
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 bg-muted rounded-full h-2">
+                        <div 
+                          className="bg-blue-500 h-2 rounded-full" 
+                          style={{ 
+                            width: `${totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAge18To25 / totals.totalEnrolled) * 100)}%` 
+                          }}
+                        />
+                      </div>
+                      <Badge variant="outline" className="font-bold text-sm px-3">
+                        {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAge18To25 / totals.totalEnrolled) * 100)}%
+                      </Badge>
+                    </div>
+                  </li>
+                  <li className="flex justify-between items-center p-2 rounded hover:bg-muted/50 transition-colors">
+                    <span className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-green-500" /> 
+                      26-35:
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 bg-muted rounded-full h-2">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full" 
+                          style={{ 
+                            width: `${totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAge26To35 / totals.totalEnrolled) * 100)}%` 
+                          }}
+                        />
+                      </div>
+                      <Badge variant="outline" className="font-bold text-sm px-3">
+                        {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAge26To35 / totals.totalEnrolled) * 100)}%
+                      </Badge>
+                    </div>
+                  </li>
+                  <li className="flex justify-between items-center p-2 rounded hover:bg-muted/50 transition-colors">
+                    <span className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-orange-500" /> 
+                      36-45:
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 bg-muted rounded-full h-2">
+                        <div 
+                          className="bg-orange-500 h-2 rounded-full" 
+                          style={{ 
+                            width: `${totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAge36To45 / totals.totalEnrolled) * 100)}%` 
+                          }}
+                        />
+                      </div>
+                      <Badge variant="outline" className="font-bold text-sm px-3">
+                        {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAge36To45 / totals.totalEnrolled) * 100)}%
+                      </Badge>
+                    </div>
+                  </li>
+                  <li className="flex justify-between items-center p-2 rounded hover:bg-muted/50 transition-colors">
+                    <span className="flex items-center gap-2">
+                      <UserRound className="h-4 w-4 text-red-500" /> 
+                      Above 45:
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 bg-muted rounded-full h-2">
+                        <div 
+                          className="bg-red-500 h-2 rounded-full" 
+                          style={{ 
+                            width: `${totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAbove45 / totals.totalEnrolled) * 100)}%` 
+                          }}
+                        />
+                      </div>
+                      <Badge variant="outline" className="font-bold text-sm px-3">
+                        {totals.totalEnrolled === 0 ? 0 : Math.round((totals.totalAbove45 / totals.totalEnrolled) * 100)}%
+                      </Badge>
+                    </div>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         )}
       </CardContent>

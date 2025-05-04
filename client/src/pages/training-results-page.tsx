@@ -16,7 +16,8 @@ import {
   Star, 
   CheckCircle,
   Briefcase,
-  Calendar
+  Calendar,
+  X
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -161,7 +162,7 @@ const sampleTrainingResults: TrainingResult[] = [
 const EmploymentBadge = ({ status }: { status: TrainingResult["employmentStatus"] }) => {
   switch (status) {
     case "Employed":
-      return <Badge variant="success" className="flex items-center gap-1">
+      return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 flex items-center gap-1">
         <CheckCircle className="h-3 w-3" />
         <span>Employed</span>
       </Badge>;
@@ -464,6 +465,15 @@ export default function TrainingResultsPage() {
                         Grade
                       </h4>
                       <p className="text-right font-medium text-xl">{Math.round(selectedResult.overallRating * 20)}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                        Result
+                      </h4>
+                      <ResultBadge result={selectedResult.result} />
                     </div>
                   </div>
                   

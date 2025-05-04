@@ -17,11 +17,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CalendarIcon } from "lucide-react";
-import { Search, Plus, FileText, Receipt, CreditCard, Filter, Download } from "lucide-react";
+import { Search, Plus, FileText, Receipt, CreditCard, Filter, Download, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/use-auth";
 
 // Define payment interface
 interface Payment {
@@ -132,6 +133,7 @@ export default function PaymentsPage() {
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Form state for new payment
   const [newPayment, setNewPayment] = useState({
@@ -221,88 +223,99 @@ export default function PaymentsPage() {
               <Button variant="outline" className="flex items-center gap-2">
                 <Download className="h-4 w-4" /> Export Report
               </Button>
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" /> Record Payment
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Record New Payment</DialogTitle>
-                    <DialogDescription>
-                      Enter the payment details below.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="traineeId">Trainee ID</Label>
-                      <Input
-                        id="traineeId"
-                        value={newPayment.traineeId}
-                        onChange={(e) => setNewPayment({ ...newPayment, traineeId: e.target.value })}
-                        placeholder="Enter trainee ID"
-                      />
+              
+              {/* Only show Record Payment button for cashier role */}
+              {user?.role !== "pesdo_admin" && (
+                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="flex items-center gap-2">
+                      <Plus className="h-4 w-4" /> Record Payment
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Record New Payment</DialogTitle>
+                      <DialogDescription>
+                        Enter the payment details below.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="traineeId">Trainee ID</Label>
+                        <Input
+                          id="traineeId"
+                          value={newPayment.traineeId}
+                          onChange={(e) => setNewPayment({ ...newPayment, traineeId: e.target.value })}
+                          placeholder="Enter trainee ID"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="traineeName">Trainee Name</Label>
+                        <Input
+                          id="traineeName"
+                          value={newPayment.traineeName}
+                          onChange={(e) => setNewPayment({ ...newPayment, traineeName: e.target.value })}
+                          placeholder="Enter trainee name"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="course">Course</Label>
+                        <Input
+                          id="course"
+                          value={newPayment.course}
+                          onChange={(e) => setNewPayment({ ...newPayment, course: e.target.value })}
+                          placeholder="Enter course name"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="amount">Amount</Label>
+                        <Input
+                          id="amount"
+                          value={newPayment.amount}
+                          onChange={(e) => setNewPayment({ ...newPayment, amount: e.target.value })}
+                          placeholder="Enter payment amount"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="paymentMethod">Payment Method</Label>
+                        <Select
+                          value={newPayment.paymentMethod}
+                          onValueChange={(value) => setNewPayment({ ...newPayment, paymentMethod: value })}
+                        >
+                          <SelectTrigger id="paymentMethod">
+                            <SelectValue placeholder="Select payment method" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Cash">Cash</SelectItem>
+                            <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="receiptNumber">Receipt Number</Label>
+                        <Input
+                          id="receiptNumber"
+                          value={newPayment.receiptNumber}
+                          onChange={(e) => setNewPayment({ ...newPayment, receiptNumber: e.target.value })}
+                          placeholder="Enter receipt number"
+                        />
+                      </div>
                     </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="traineeName">Trainee Name</Label>
-                      <Input
-                        id="traineeName"
-                        value={newPayment.traineeName}
-                        onChange={(e) => setNewPayment({ ...newPayment, traineeName: e.target.value })}
-                        placeholder="Enter trainee name"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="course">Course</Label>
-                      <Input
-                        id="course"
-                        value={newPayment.course}
-                        onChange={(e) => setNewPayment({ ...newPayment, course: e.target.value })}
-                        placeholder="Enter course name"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="amount">Amount</Label>
-                      <Input
-                        id="amount"
-                        value={newPayment.amount}
-                        onChange={(e) => setNewPayment({ ...newPayment, amount: e.target.value })}
-                        placeholder="Enter payment amount"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="paymentMethod">Payment Method</Label>
-                      <Select
-                        value={newPayment.paymentMethod}
-                        onValueChange={(value) => setNewPayment({ ...newPayment, paymentMethod: value })}
-                      >
-                        <SelectTrigger id="paymentMethod">
-                          <SelectValue placeholder="Select payment method" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Cash">Cash</SelectItem>
-                          <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="receiptNumber">Receipt Number</Label>
-                      <Input
-                        id="receiptNumber"
-                        value={newPayment.receiptNumber}
-                        onChange={(e) => setNewPayment({ ...newPayment, receiptNumber: e.target.value })}
-                        placeholder="Enter receipt number"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={handleCreatePayment}>Record Payment</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+                      <Button onClick={handleCreatePayment}>Record Payment</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+              
+              {/* For admin: Add a note that they can only view payments */}
+              {user?.role === "pesdo_admin" && (
+                <div className="text-sm text-muted-foreground flex items-center">
+                  <Info className="h-4 w-4 mr-1" /> View-only mode: Payments are recorded by cashiers
+                </div>
+              )}
             </div>
           </div>
           

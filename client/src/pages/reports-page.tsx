@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   File, 
   FileSpreadsheet, 
@@ -199,27 +200,18 @@ export default function ReportsPage() {
           </div>
           
           <div className="flex flex-col gap-6 mb-6">
-            <Card className="shadow-md">
-              <CardHeader>
+            <Card className="shadow-md border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-bold">
                     {user?.role === "cashier" ? "Payment Reports" : "Monthly Training and Employment Report"}
                   </CardTitle>
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4 items-center">
                     {user?.role !== "cashier" && (
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="report-type">Report Type:</Label>
-                        <Select 
-                          value={reportType} 
-                          onValueChange={setReportType}
-                        >
-                          <SelectTrigger id="report-type" className="w-[250px]">
-                            <SelectValue placeholder="Select report" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="monthly">Monthly Training Report</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Badge variant="secondary" className="px-3 py-1.5 bg-primary/5 text-primary border-primary/20">
+                          Monthly Training Report
+                        </Badge>
                       </div>
                     )}
                     
@@ -227,13 +219,13 @@ export default function ReportsPage() {
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-[250px] justify-start text-left font-normal flex gap-2 items-center"
+                          className="w-[250px] justify-start text-left font-normal flex gap-2 items-center border-primary/20 hover:bg-primary/5"
                         >
-                          <Calendar className="h-4 w-4" />
+                          <Calendar className="h-4 w-4 text-primary" />
                           {formatDateRange() || "Pick a date range"}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
+                      <PopoverContent className="w-auto p-0 border-primary/20">
                         <CalendarComponent
                           initialFocus
                           mode="range"

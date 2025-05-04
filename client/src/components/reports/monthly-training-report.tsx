@@ -17,6 +17,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { 
+  GraduationCap, 
+  Users, 
+  Briefcase, 
+  UserCircle,
+  Sparkles,
+  User,
+  UserRound
+} from "lucide-react";
 
 // Interface for the report data
 interface TrainingReportData {

@@ -33,7 +33,7 @@ interface Payment {
   course: string;
   amount: number;
   receiptNumber: string;
-  status: "Paid" | "Partial" | "Unpaid";
+  status: "Paid" | "Unpaid" | "Partial"; // Keeping "Partial" for backward compatibility, but UI will show as "Unpaid"
   paymentDate: string;
   paymentMethod: "Cash" | "Bank Transfer" | "Other";
 }
@@ -188,10 +188,11 @@ export default function PaymentsPage() {
     switch (status) {
       case "Paid":
         return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{status}</Badge>;
-      case "Partial":
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">{status}</Badge>;
       case "Unpaid":
         return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">{status}</Badge>;
+      // Keep case for Partial for backward compatibility with existing data
+      case "Partial":
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Unpaid</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -466,24 +467,30 @@ export default function PaymentsPage() {
                             <TableCell className="font-medium text-red-600">{formatCurrency(trainee.remaining)}</TableCell>
                             <TableCell>{getPaymentBadge(trainee.status as Payment["status"])}</TableCell>
                             <TableCell>
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => {
-                                  setNewPayment({
-                                    traineeId: trainee.id,
-                                    traineeName: trainee.name,
-                                    course: trainee.course,
-                                    amount: trainee.remaining.toString(),
-                                    paymentMethod: "Cash",
-                                    receiptNumber: ""
-                                  });
-                                  setIsAddDialogOpen(true);
-                                }}
-                                className="flex items-center gap-1"
-                              >
-                                <CreditCard className="h-3 w-3" /> Record Payment
-                              </Button>
+                              {user?.role !== "pesdo_admin" ? (
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => {
+                                    setNewPayment({
+                                      traineeId: trainee.id,
+                                      traineeName: trainee.name,
+                                      course: trainee.course,
+                                      amount: trainee.remaining.toString(),
+                                      paymentMethod: "Cash",
+                                      receiptNumber: ""
+                                    });
+                                    setIsAddDialogOpen(true);
+                                  }}
+                                  className="flex items-center gap-1"
+                                >
+                                  <CreditCard className="h-3 w-3" /> Record Payment
+                                </Button>
+                              ) : (
+                                <span className="text-sm text-muted-foreground flex items-center">
+                                  <Info className="h-3.5 w-3.5 mr-1" /> Pending payment
+                                </span>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}

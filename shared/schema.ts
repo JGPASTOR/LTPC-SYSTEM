@@ -72,7 +72,7 @@ export const trainees = pgTable("trainees", {
   enrollmentDate: date("enrollment_date").notNull(),
   completionDate: date("completion_date"),
   status: text("status").notNull().default("Active"), // Active, Completed, Dropped
-  payment: text("payment").notNull().default("Unpaid"), // Paid, Partial, Unpaid
+  payment: text("payment").notNull().default("Unpaid"), // Paid, Unpaid (removed Partial option)
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -100,7 +100,7 @@ export const payments = pgTable("payments", {
   amount: integer("amount").notNull(),
   receiptNumber: text("receipt_number").notNull().unique(),
   paymentMethod: text("payment_method").notNull(),
-  status: text("status").notNull().default("Paid"), // Paid, Partial
+  status: text("status").notNull().default("Paid"), // Paid, Unpaid (removed Partial option)
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

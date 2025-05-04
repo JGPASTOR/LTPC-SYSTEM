@@ -299,13 +299,13 @@ export default function TraineesPage() {
   });
 
   // State for course filter
-  const [courseFilter, setCourseFilter] = useState<string>("");
+  const [courseFilter, setCourseFilter] = useState<string>("all");
   
   // Filter trainees based on search query and course filter
   const filteredTrainees = trainees?.filter(
     (trainee) => {
       // First apply course filter if selected
-      if (courseFilter && trainee.course !== courseFilter) {
+      if (courseFilter !== "all" && trainee.course !== courseFilter) {
         return false;
       }
       
@@ -722,14 +722,14 @@ export default function TraineesPage() {
                   <TableBody>
                     {isLoading ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-6">
+                        <TableCell colSpan={7} className="text-center py-6">
                           Loading trainees...
                         </TableCell>
                       </TableRow>
                     ) : filteredTrainees?.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-6">
-                          No trainees found. Try a different search term.
+                        <TableCell colSpan={7} className="text-center py-6">
+                          No trainees found. Try a different search term or filter.
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -744,7 +744,6 @@ export default function TraineesPage() {
                               <span>{trainee.name}</span>
                             </div>
                           </TableCell>
-                          <TableCell>{trainee.course}</TableCell>
                           <TableCell>
                             {trainee.trainerName ? (
                               <span className="text-sm font-medium">{trainee.trainerName}</span>

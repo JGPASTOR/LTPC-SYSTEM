@@ -257,13 +257,23 @@ const AnnualSummaryReport: React.FC = () => {
               <TableCell className="border text-center">{totals.totalAge36To45}</TableCell>
               <TableCell className="border text-center">{totals.totalAbove45}</TableCell>
               <TableCell className="border text-center">
-                <Badge variant="success">100%</Badge>
+                <Badge 
+                  variant="secondary"
+                  className="bg-green-100 text-green-700 hover:bg-green-200"
+                >
+                  100%
+                </Badge>
               </TableCell>
               <TableCell className="border text-center">{totals.totalEmployed}</TableCell>
               <TableCell className="border text-center">{totals.totalSelfEmployed}</TableCell>
               <TableCell className="border text-center">{totals.totalUnemployed}</TableCell>
               <TableCell className="border text-center">
-                <Badge variant="success">{totalOverallPercentage}%</Badge>
+                <Badge 
+                  variant="secondary"
+                  className="bg-green-100 text-green-700 hover:bg-green-200"
+                >
+                  {totalOverallPercentage}%
+                </Badge>
               </TableCell>
               <TableCell className="border text-center">{totals.totalEnrolled}</TableCell>
             </TableRow>

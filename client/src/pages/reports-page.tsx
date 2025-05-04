@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import AnnualSummaryReport from "@/components/reports/annual-summary-report";
 import { 
   File, 
   FileSpreadsheet, 
@@ -341,6 +342,7 @@ export default function ReportsPage() {
                             <SelectItem value="completion">Completion Report</SelectItem>
                             <SelectItem value="payment">Payment Report</SelectItem>
                             <SelectItem value="employment">Employment Report</SelectItem>
+                            <SelectItem value="annual">Annual Summary Report</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -386,6 +388,10 @@ export default function ReportsPage() {
                   
                   <TabsContent value="chart" className="w-full">
                     <div className="h-[400px] w-full">
+                      {reportType === "annual" && (
+                        <AnnualSummaryReport />
+                      )}
+                      
                       {reportType === "enrollment" && (
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart
@@ -571,6 +577,10 @@ export default function ReportsPage() {
                   
                   <TabsContent value="data" className="w-full">
                     <div className="h-[400px] w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {reportType === "annual" && (
+                        <AnnualSummaryReport />
+                      )}
+                    
                       {reportType === "enrollment" && (
                         <ResponsiveContainer width="100%" height="100%">
                           <RechartsPieChart>
@@ -736,6 +746,10 @@ export default function ReportsPage() {
                   
                   <TabsContent value="table" className="w-full">
                     <div className="overflow-x-auto">
+                      {reportType === "annual" && (
+                        <AnnualSummaryReport />
+                      )}
+                      
                       {reportType === "enrollment" && (
                         <Table>
                           <TableHeader>

@@ -176,6 +176,107 @@ const getRecentEnrollments = (): Enrollment[] => [
   }
 ];
 
+// Role-specific dashboard component
+type RoleSpecificDashboardProps = {
+  userRole?: string;
+  onViewEnrollment: (id: string) => void;
+  onEditEnrollment: (id: string) => void;
+};
+
+function RoleSpecificDashboard({ userRole, onViewEnrollment, onEditEnrollment }: RoleSpecificDashboardProps) {
+  // PESDO Admin View
+  if (userRole === "pesdo_admin") {
+    return (
+      <>
+        {/* Middle Row Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <EnrollmentChart
+            monthlyData={getMonthlyEnrollmentData()}
+            quarterlyData={getQuarterlyEnrollmentData()}
+            yearlyData={getYearlyEnrollmentData()}
+          />
+          <CourseDistribution
+            data={getCourseDistributionData()}
+          />
+        </div>
+        
+        {/* Recent Enrollments Table */}
+        <EnrollmentTable
+          enrollments={getRecentEnrollments()}
+          onView={onViewEnrollment}
+          onEdit={onEditEnrollment}
+        />
+        
+        {/* Bottom Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <UpcomingBatches batches={getUpcomingBatches()} />
+          <RecentActivities activities={getRecentActivities()} />
+        </div>
+      </>
+    );
+  }
+  
+  // Enrollment Officer View
+  if (userRole === "enrollment_officer") {
+    return (
+      <>
+        {/* Enrollments Table */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Recent Enrollments</h2>
+          <EnrollmentTable
+            enrollments={getRecentEnrollments()}
+            onView={onViewEnrollment}
+            onEdit={onEditEnrollment}
+          />
+        </div>
+        
+        {/* Upcoming Batches */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Upcoming Batches</h2>
+          <UpcomingBatches batches={getUpcomingBatches()} />
+        </div>
+      </>
+    );
+  }
+  
+  // Cashier View
+  if (userRole === "cashier") {
+    return (
+      <>
+        {/* Enrollments with Payment Status */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Payment Status</h2>
+          <EnrollmentTable
+            enrollments={getRecentEnrollments().sort((a, b) => {
+              // Show unpaid first, then partial, then paid
+              const paymentOrder = { "Unpaid": 0, "Partial": 1, "Paid": 2 };
+              return paymentOrder[a.payment] - paymentOrder[b.payment];
+            })}
+            onView={onViewEnrollment}
+            onEdit={onEditEnrollment}
+          />
+        </div>
+        
+        {/* Recent Payment Activities */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Recent Payment Activities</h2>
+          <RecentActivities 
+            activities={getRecentActivities().filter(a => a.type === "payment")} 
+          />
+        </div>
+      </>
+    );
+  }
+  
+  // Default view - if role doesn't match or is undefined
+  return (
+    <div className="mt-8 p-6 bg-card border rounded-lg text-center">
+      <h3 className="text-xl font-medium mb-2">Welcome to the LTPC Enrollment System</h3>
+      <p className="text-muted-foreground">Please login with appropriate role credentials to access dashboard information.</p>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { toast } = useToast();
@@ -228,7 +329,8 @@ export default function DashboardPage() {
     else if (timeOfDay < 18) greeting += "afternoon";
     else greeting += "evening";
     
-    return `${greeting}, ${user?.name}. Welcome to your ${user?.role.replace('_', ' ')} dashboard.`;
+    const roleName = user?.role ? user.role.replace('_', ' ') : '';
+    return `${greeting}, ${user?.name || ''}. Welcome to your ${roleName} dashboard.`;
   };
 
   return (
@@ -297,83 +399,12 @@ export default function DashboardPage() {
             )}
           </div>
           
-          {/* PESDO Admin sees all charts */}
-          {user?.role === "pesdo_admin" && (
-            <>
-              {/* Middle Row Charts */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <EnrollmentChart
-                  monthlyData={getMonthlyEnrollmentData()}
-                  quarterlyData={getQuarterlyEnrollmentData()}
-                  yearlyData={getYearlyEnrollmentData()}
-                />
-                <CourseDistribution
-                  data={getCourseDistributionData()}
-                />
-              </div>
-              
-              {/* Recent Enrollments Table */}
-              <EnrollmentTable
-                enrollments={getRecentEnrollments()}
-                onView={handleViewEnrollment}
-                onEdit={handleEditEnrollment}
-              />
-              
-              {/* Bottom Row */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <UpcomingBatches batches={getUpcomingBatches()} />
-                <RecentActivities activities={getRecentActivities()} />
-              </div>
-            </>
-          )}
-          
-          {/* Enrollment Officer sees enrollment-focused view */}
-          {user?.role === "enrollment_officer" && (
-            <>
-              {/* Enrollments Table */}
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Recent Enrollments</h2>
-                <EnrollmentTable
-                  enrollments={getRecentEnrollments()}
-                  onView={handleViewEnrollment}
-                  onEdit={handleEditEnrollment}
-                />
-              </div>
-              
-              {/* Upcoming Batches */}
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Upcoming Batches</h2>
-                <UpcomingBatches batches={getUpcomingBatches()} />
-              </div>
-            </>
-          )}
-          
-          {/* Cashier sees payment-focused view */}
-          {user?.role === "cashier" && (
-            <>
-              {/* Enrollments with Payment Status */}
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Payment Status</h2>
-                <EnrollmentTable
-                  enrollments={getRecentEnrollments().sort((a, b) => {
-                    // Show unpaid first, then partial, then paid
-                    const paymentOrder = { "Unpaid": 0, "Partial": 1, "Paid": 2 };
-                    return paymentOrder[a.payment] - paymentOrder[b.payment];
-                  })}
-                  onView={handleViewEnrollment}
-                  onEdit={handleEditEnrollment}
-                />
-              </div>
-              
-              {/* Recent Payment Activities */}
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Recent Payment Activities</h2>
-                <RecentActivities 
-                  activities={getRecentActivities().filter(a => a.type === "payment")} 
-                />
-              </div>
-            </>
-          )}
+          {/* Role-specific content */}
+          <RoleSpecificDashboard 
+            userRole={user?.role} 
+            onViewEnrollment={handleViewEnrollment}
+            onEditEnrollment={handleEditEnrollment}
+          />
         </main>
       </div>
     </div>

@@ -317,33 +317,48 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async initializeData() {
-    // Check if we already have users
-    const existingUsers = await db.select().from(users);
-    
-    if (existingUsers.length === 0) {
-      // Add initial admin user
-      await this.createUser({
-        username: "admin",
-        password: "admin123",
-        name: "System Administrator",
-        role: "pesdo_admin"
-      });
+    try {
+      // Check if we already have users
+      const existingUsers = await db.select().from(users);
       
-      // Add sample enrollment officer
-      await this.createUser({
-        username: "enrollment",
-        password: "enrollment123",
-        name: "Enrollment Officer",
-        role: "enrollment_officer"
-      });
-      
-      // Add sample cashier
-      await this.createUser({
-        username: "cashier",
-        password: "cashier123",
-        name: "Cashier",
-        role: "cashier"
-      });
+      if (existingUsers.length === 0) {
+        // Create hash function here to avoid circular dependencies
+        const scryptAsync = promisify(scrypt);
+        
+        const hashPasswordLocal = async (password: string) => {
+          const salt = randomBytes(16).toString("hex");
+          const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+          return `${buf.toString("hex")}.${salt}`;
+        };
+        
+        // Add initial admin user
+        await this.createUser({
+          username: "admin",
+          password: await hashPasswordLocal("admin123"),
+          name: "System Administrator",
+          role: "pesdo_admin"
+        });
+        
+        // Add sample enrollment officer
+        await this.createUser({
+          username: "enrollment",
+          password: await hashPasswordLocal("enrollment123"),
+          name: "Enrollment Officer",
+          role: "enrollment_officer"
+        });
+        
+        // Add sample cashier
+        await this.createUser({
+          username: "cashier",
+          password: await hashPasswordLocal("cashier123"),
+          name: "Cashier",
+          role: "cashier"
+        });
+        
+        console.log("Initial users created successfully");
+      }
+    } catch (error) {
+      console.error("Error initializing data:", error);
     }
   }
 

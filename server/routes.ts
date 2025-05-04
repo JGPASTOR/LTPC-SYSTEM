@@ -31,8 +31,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
-  app.post("/api/courses", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.post("/api/courses", hasRole("pesdo_admin", "enrollment_officer"), (req, res) => {
     storage.createCourse(req.body)
       .then(course => res.status(201).json(course))
       .catch(err => res.status(500).json({ error: err.message }));
@@ -48,8 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
-  app.put("/api/courses/:id", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.put("/api/courses/:id", hasRole("pesdo_admin", "enrollment_officer"), (req, res) => {
     storage.updateCourse(parseInt(req.params.id), req.body)
       .then(course => {
         if (!course) return res.status(404).json({ error: "Course not found" });
@@ -66,8 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
-  app.post("/api/trainees", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.post("/api/trainees", hasRole("pesdo_admin", "enrollment_officer"), (req, res) => {
     storage.createTrainee(req.body)
       .then(trainee => res.status(201).json(trainee))
       .catch(err => res.status(500).json({ error: err.message }));
@@ -83,8 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
-  app.put("/api/trainees/:id", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.put("/api/trainees/:id", hasRole("pesdo_admin", "enrollment_officer"), (req, res) => {
     storage.updateTrainee(parseInt(req.params.id), req.body)
       .then(trainee => {
         if (!trainee) return res.status(404).json({ error: "Trainee not found" });
@@ -101,8 +97,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
-  app.post("/api/trainers", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.post("/api/trainers", hasRole("pesdo_admin"), (req, res) => {
     storage.createTrainer(req.body)
       .then(trainer => res.status(201).json(trainer))
       .catch(err => res.status(500).json({ error: err.message }));
@@ -118,8 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
-  app.put("/api/trainers/:id", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.put("/api/trainers/:id", hasRole("pesdo_admin"), (req, res) => {
     storage.updateTrainer(parseInt(req.params.id), req.body)
       .then(trainer => {
         if (!trainer) return res.status(404).json({ error: "Trainer not found" });
@@ -129,22 +123,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Payment routes
-  app.get("/api/payments", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.get("/api/payments", hasRole("pesdo_admin", "cashier"), (req, res) => {
     storage.getAllPayments()
       .then(payments => res.json(payments))
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
-  app.post("/api/payments", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.post("/api/payments", hasRole("pesdo_admin", "cashier"), (req, res) => {
     storage.createPayment(req.body)
       .then(payment => res.status(201).json(payment))
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
-  app.get("/api/payments/:id", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.get("/api/payments/:id", hasRole("pesdo_admin", "cashier"), (req, res) => {
     storage.getPayment(parseInt(req.params.id))
       .then(payment => {
         if (!payment) return res.status(404).json({ error: "Payment not found" });
@@ -153,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
-  // Dashboard statistics
+  // Dashboard statistics - accessible by all authenticated users
   app.get("/api/dashboard/stats", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     storage.getDashboardStats()
@@ -161,9 +152,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
-  // Reports data
-  app.get("/api/reports/:type", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  // Reports data - only accessible by admin
+  app.get("/api/reports/:type", hasRole("pesdo_admin"), (req, res) => {
     const { type } = req.params;
     const { from, to } = req.query;
     

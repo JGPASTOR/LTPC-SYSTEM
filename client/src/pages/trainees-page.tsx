@@ -21,6 +21,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
+// Trainer interface for selection in trainee registration
+interface Trainer {
+  id: string;
+  name: string;
+  expertise: string;
+}
+
 // Define trainee interface
 interface Trainee {
   id: string;
@@ -32,6 +39,8 @@ interface Trainee {
   enrollmentDate: string;
   status: "Active" | "Completed" | "Dropped";
   payment: "Paid" | "Partial" | "Unpaid";
+  trainerId?: string;
+  trainerName?: string;
 }
 
 // Sample trainees data
@@ -114,6 +123,15 @@ const courses = [
   "Computer Servicing"
 ];
 
+// Sample trainers for dropdown
+const sampleAvailableTrainers: Trainer[] = [
+  { id: "TR001", name: "Maria Reyes", expertise: "Web Development" },
+  { id: "TR002", name: "Pedro Santos", expertise: "Culinary Arts" },
+  { id: "TR003", name: "Lisa Garcia", expertise: "Dressmaking" },
+  { id: "TR004", name: "Manuel Tan", expertise: "Electrical Installation" },
+  { id: "TR005", name: "Ana Lim", expertise: "Baking & Pastry Arts" }
+];
+
 export default function TraineesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -130,7 +148,9 @@ export default function TraineesPage() {
     contact: "",
     course: "",
     status: "Active" as Trainee["status"],
-    payment: "Unpaid" as Trainee["payment"]
+    payment: "Unpaid" as Trainee["payment"],
+    trainerId: "",
+    trainerName: ""
   });
 
   // Fetch trainees
@@ -148,11 +168,27 @@ export default function TraineesPage() {
       trainee.status.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Function to get trainer name by ID
+  const getTrainerNameById = (id: string) => {
+    const trainer = sampleAvailableTrainers.find(trainer => trainer.id === id);
+    return trainer ? trainer.name : "";
+  };
+
+  // Handle trainer change in form
+  const handleTrainerChange = (trainerId: string) => {
+    const trainerName = getTrainerNameById(trainerId);
+    setNewTrainee({ ...newTrainee, trainerId, trainerName });
+  };
+
   // Handle creating a new trainee
   const handleCreateTrainee = () => {
+    const trainerInfo = newTrainee.trainerId 
+      ? ` and assigned to ${newTrainee.trainerName}`
+      : "";
+      
     toast({
       title: "Trainee Registered",
-      description: `${newTrainee.name} has been successfully registered.`,
+      description: `${newTrainee.name} has been successfully registered${trainerInfo}.`,
     });
     setIsAddDialogOpen(false);
     setNewTrainee({
@@ -162,7 +198,9 @@ export default function TraineesPage() {
       contact: "",
       course: "",
       status: "Active",
-      payment: "Unpaid"
+      payment: "Unpaid",
+      trainerId: "",
+      trainerName: ""
     });
   };
 
@@ -317,6 +355,42 @@ export default function TraineesPage() {
                         </SelectContent>
                       </Select>
                     </div>
+                    
+                    <div className="grid gap-2">
+                      <Label htmlFor="trainer">Assign Trainer</Label>
+                      <Select
+                        value={newTrainee.trainerId}
+                        onValueChange={handleTrainerChange}
+                      >
+                        <SelectTrigger id="trainer">
+                          <SelectValue placeholder="Select a trainer (optional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {newTrainee.course && (
+                            <>
+                              {sampleAvailableTrainers
+                                .filter(trainer => !newTrainee.course || trainer.expertise === newTrainee.course)
+                                .map((trainer) => (
+                                  <SelectItem key={trainer.id} value={trainer.id}>
+                                    {trainer.name} - {trainer.expertise}
+                                  </SelectItem>
+                                ))}
+                              {!sampleAvailableTrainers.some(trainer => trainer.expertise === newTrainee.course) && (
+                                <SelectItem disabled value="none">No specialized trainers found for this course</SelectItem>
+                              )}
+                            </>
+                          )}
+                          {!newTrainee.course && (
+                            <SelectItem disabled value="none">Select a course first</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        {newTrainee.course 
+                          ? "Trainers with matching expertise will be shown" 
+                          : "Please select a course first to see available trainers"}
+                      </p>
+                    </div>
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
@@ -350,6 +424,7 @@ export default function TraineesPage() {
                       <TableHead>ID</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Course</TableHead>
+                      <TableHead>Trainer</TableHead>
                       <TableHead>Enrollment Date</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Payment</TableHead>
@@ -485,6 +560,12 @@ export default function TraineesPage() {
                   <p className="text-sm text-muted-foreground">Payment</p>
                   <div className="mt-1">{getPaymentBadge(selectedTrainee.payment)}</div>
                 </div>
+                {selectedTrainee.trainerId && selectedTrainee.trainerName && (
+                  <div className="col-span-2 mt-2 pt-2 border-t">
+                    <p className="text-sm text-muted-foreground">Assigned Trainer</p>
+                    <p className="font-medium">{selectedTrainee.trainerName}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

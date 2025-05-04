@@ -250,8 +250,8 @@ export function CashierDashboard() {
         </div>
         <PaymentStatusCards
           enrollments={getPaymentRecords().sort((a, b) => {
-            // Show unpaid first, then paid
-            const paymentOrder = { "Unpaid": 0, "Paid": 1 };
+            // Show pending first, then paid
+            const paymentOrder = { "Pending": 0, "Paid": 1 };
             return paymentOrder[a.payment] - paymentOrder[b.payment];
           })}
           onView={handleViewEnrollment}

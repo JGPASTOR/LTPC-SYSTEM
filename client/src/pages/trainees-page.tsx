@@ -54,7 +54,7 @@ interface Trainee {
   course: string;
   enrollmentDate: string;
   status: "Active" | "Completed" | "Dropped";
-  payment: "Paid" | "Partial" | "Unpaid";
+  payment: "Paid" | "Unpaid";
   trainerId?: string;
   trainerName?: string;
 }

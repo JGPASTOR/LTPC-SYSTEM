@@ -316,7 +316,7 @@ export default function AssessmentResultsPage() {
                       <TableHead>Course</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Date</TableHead>
-                      <TableHead>Score</TableHead>
+                      <TableHead>Grade</TableHead>
                       <TableHead>Result</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -424,7 +424,7 @@ export default function AssessmentResultsPage() {
                   
                   <div className="border-t pt-4">
                     <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                      Score Breakdown
+                      Grade Breakdown
                     </h4>
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-medium">

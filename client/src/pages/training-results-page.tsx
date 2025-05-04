@@ -366,9 +366,7 @@ export default function TrainingResultsPage() {
                       <TableHead>Trainee</TableHead>
                       <TableHead>Course</TableHead>
                       <TableHead>Completion Date</TableHead>
-                      <TableHead>Rating</TableHead>
-                      <TableHead>Certificate</TableHead>
-                      <TableHead>Employment</TableHead>
+                      <TableHead>Grade</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -381,12 +379,6 @@ export default function TrainingResultsPage() {
                         <TableCell>{new Date(result.completionDate).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <StarRating rating={result.overallRating} />
-                        </TableCell>
-                        <TableCell>
-                          <CertificateBadge issued={result.certificateIssued} />
-                        </TableCell>
-                        <TableCell>
-                          <EmploymentBadge status={result.employmentStatus} />
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
@@ -436,7 +428,10 @@ export default function TrainingResultsPage() {
                       </h4>
                       <p className="font-medium">{selectedResult.id}</p>
                     </div>
-                    <div className="flex items-center">
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1 text-right">
+                        Grade
+                      </h4>
                       <StarRating rating={selectedResult.overallRating} />
                     </div>
                   </div>

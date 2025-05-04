@@ -152,6 +152,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .catch(err => res.status(500).json({ error: err.message }));
   });
   
+  // Assessment routes
+  app.get("/api/assessments", hasRole("pesdo_admin"), (req, res) => {
+    storage.getAllAssessments()
+      .then(assessments => res.json(assessments))
+      .catch(err => res.status(500).json({ error: err.message }));
+  });
+  
+  app.get("/api/assessments/trainee/:traineeId", hasRole("pesdo_admin"), (req, res) => {
+    storage.getAssessmentsByTraineeId(req.params.traineeId)
+      .then(assessments => res.json(assessments))
+      .catch(err => res.status(500).json({ error: err.message }));
+  });
+  
+  app.post("/api/assessments", hasRole("pesdo_admin"), (req, res) => {
+    storage.createAssessment(req.body)
+      .then(assessment => res.status(201).json(assessment))
+      .catch(err => res.status(500).json({ error: err.message }));
+  });
+  
+  app.get("/api/assessments/:id", hasRole("pesdo_admin"), (req, res) => {
+    storage.getAssessment(parseInt(req.params.id))
+      .then(assessment => {
+        if (!assessment) return res.status(404).json({ error: "Assessment not found" });
+        res.json(assessment);
+      })
+      .catch(err => res.status(500).json({ error: err.message }));
+  });
+  
+  app.put("/api/assessments/:id", hasRole("pesdo_admin"), (req, res) => {
+    storage.updateAssessment(parseInt(req.params.id), req.body)
+      .then(assessment => {
+        if (!assessment) return res.status(404).json({ error: "Assessment not found" });
+        res.json(assessment);
+      })
+      .catch(err => res.status(500).json({ error: err.message }));
+  });
+  
+  // Training Results routes
+  app.get("/api/training-results", hasRole("pesdo_admin"), (req, res) => {
+    storage.getAllTrainingResults()
+      .then(results => res.json(results))
+      .catch(err => res.status(500).json({ error: err.message }));
+  });
+  
+  app.get("/api/training-results/trainee/:traineeId", hasRole("pesdo_admin"), (req, res) => {
+    storage.getTrainingResultByTraineeId(req.params.traineeId)
+      .then(result => {
+        if (!result) return res.status(404).json({ error: "Training result not found for this trainee" });
+        res.json(result);
+      })
+      .catch(err => res.status(500).json({ error: err.message }));
+  });
+  
+  app.post("/api/training-results", hasRole("pesdo_admin"), (req, res) => {
+    storage.createTrainingResult(req.body)
+      .then(result => res.status(201).json(result))
+      .catch(err => res.status(500).json({ error: err.message }));
+  });
+  
+  app.get("/api/training-results/:id", hasRole("pesdo_admin"), (req, res) => {
+    storage.getTrainingResult(parseInt(req.params.id))
+      .then(result => {
+        if (!result) return res.status(404).json({ error: "Training result not found" });
+        res.json(result);
+      })
+      .catch(err => res.status(500).json({ error: err.message }));
+  });
+  
+  app.put("/api/training-results/:id", hasRole("pesdo_admin"), (req, res) => {
+    storage.updateTrainingResult(parseInt(req.params.id), req.body)
+      .then(result => {
+        if (!result) return res.status(404).json({ error: "Training result not found" });
+        res.json(result);
+      })
+      .catch(err => res.status(500).json({ error: err.message }));
+  });
+
   // Reports data - only accessible by admin
   app.get("/api/reports/:type", hasRole("pesdo_admin"), (req, res) => {
     const { type } = req.params;

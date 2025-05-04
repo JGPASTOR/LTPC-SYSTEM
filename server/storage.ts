@@ -629,6 +629,103 @@ export class DatabaseStorage implements IStorage {
     return payment;
   }
   
+  // Assessment methods
+  async getAllAssessments(): Promise<Assessment[]> {
+    return db.select().from(assessments).orderBy(desc(assessments.createdAt));
+  }
+  
+  async getAssessmentsByTraineeId(traineeId: string): Promise<Assessment[]> {
+    return db.select()
+      .from(assessments)
+      .where(eq(assessments.traineeId, traineeId))
+      .orderBy(desc(assessments.assessmentDate));
+  }
+  
+  async getAssessment(id: number): Promise<Assessment | undefined> {
+    const [assessment] = await db.select().from(assessments).where(eq(assessments.id, id));
+    return assessment;
+  }
+  
+  async createAssessment(assessmentData: InsertAssessment): Promise<Assessment> {
+    const [assessment] = await db
+      .insert(assessments)
+      .values(assessmentData)
+      .returning();
+    
+    return assessment;
+  }
+  
+  async updateAssessment(id: number, assessmentData: Partial<Assessment>): Promise<Assessment | undefined> {
+    const [updatedAssessment] = await db
+      .update(assessments)
+      .set(assessmentData)
+      .where(eq(assessments.id, id))
+      .returning();
+    
+    return updatedAssessment;
+  }
+  
+  // Training Results methods
+  async getAllTrainingResults(): Promise<TrainingResult[]> {
+    return db.select().from(trainingResults).orderBy(desc(trainingResults.createdAt));
+  }
+  
+  async getTrainingResultByTraineeId(traineeId: string): Promise<TrainingResult | undefined> {
+    const [result] = await db
+      .select()
+      .from(trainingResults)
+      .where(eq(trainingResults.traineeId, traineeId));
+    
+    return result;
+  }
+  
+  async getTrainingResult(id: number): Promise<TrainingResult | undefined> {
+    const [result] = await db.select().from(trainingResults).where(eq(trainingResults.id, id));
+    return result;
+  }
+  
+  async createTrainingResult(resultData: InsertTrainingResult): Promise<TrainingResult> {
+    let certificateNumber = resultData.certificateNumber;
+    
+    // Generate certificate number if certificate is issued but no number provided
+    if (resultData.certificateIssued && !certificateNumber) {
+      const allResults = await this.getAllTrainingResults();
+      const id = allResults.length > 0 
+        ? Math.max(...allResults.map(r => r.id)) + 1 
+        : 1;
+      certificateNumber = `CERT-${new Date().getFullYear()}-${id.toString().padStart(4, '0')}`;
+    }
+    
+    const [result] = await db
+      .insert(trainingResults)
+      .values({ ...resultData, certificateNumber })
+      .returning();
+    
+    return result;
+  }
+  
+  async updateTrainingResult(id: number, resultData: Partial<TrainingResult>): Promise<TrainingResult | undefined> {
+    // If certificate is being issued, generate a certificate number if needed
+    if (resultData.certificateIssued) {
+      const [currentResult] = await db
+        .select()
+        .from(trainingResults)
+        .where(eq(trainingResults.id, id));
+      
+      if (currentResult && !currentResult.certificateIssued && !resultData.certificateNumber) {
+        resultData.certificateNumber = `CERT-${new Date().getFullYear()}-${id.toString().padStart(4, '0')}`;
+      }
+    }
+    
+    const [updatedResult] = await db
+      .update(trainingResults)
+      .set(resultData)
+      .where(eq(trainingResults.id, id))
+      .returning();
+    
+    return updatedResult;
+  }
+  
   // Dashboard and reports
   async getDashboardStats(): Promise<any> {
     const allTrainees = await this.getAllTrainees();
@@ -705,6 +802,40 @@ export class DatabaseStorage implements IStorage {
         .from(payments);
         
         return paymentData;
+      }
+        
+      case 'assessment': {
+        const assessmentData = await db.select({
+          id: assessments.id,
+          traineeId: assessments.traineeId,
+          traineeName: assessments.traineeName,
+          course: assessments.course,
+          assessmentType: assessments.assessmentType,
+          score: assessments.score,
+          maxScore: assessments.maxScore,
+          result: assessments.result,
+          assessmentDate: assessments.assessmentDate
+        })
+        .from(assessments)
+        .orderBy(desc(assessments.assessmentDate));
+        
+        return assessmentData;
+      }
+        
+      case 'training_results': {
+        const trainingResultsData = await db.select({
+          id: trainingResults.id,
+          traineeId: trainingResults.traineeId,
+          traineeName: trainingResults.traineeName,
+          course: trainingResults.course,
+          overallRating: trainingResults.overallRating,
+          certificateIssued: trainingResults.certificateIssued,
+          certificateNumber: trainingResults.certificateNumber,
+          issuedDate: trainingResults.issuedDate
+        })
+        .from(trainingResults);
+        
+        return trainingResultsData;
       }
         
       default:

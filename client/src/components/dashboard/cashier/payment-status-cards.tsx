@@ -6,7 +6,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Wallet, AlertCircle, CheckCircle, Clock, ArrowRight } from "lucide-react";
+import { Wallet, AlertCircle, CheckCircle, ArrowRight, Clock } from "lucide-react";
 
 // Use the Enrollment type but we'll only use relevant fields
 import { Enrollment } from "@/components/enrollments/enrollment-table";
@@ -24,7 +24,6 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
       case "Paid":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case "Partial":
-        return <Clock className="h-5 w-5 text-amber-500" />;
       case "Unpaid":
         return <AlertCircle className="h-5 w-5 text-red-500" />;
       default:
@@ -38,7 +37,6 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
       case "Paid":
         return "border-green-200 bg-green-50";
       case "Partial":
-        return "border-amber-200 bg-amber-50";
       case "Unpaid":
         return "border-red-200 bg-red-50";
       default:
@@ -52,9 +50,8 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
       case "Paid":
         return <Badge className="bg-green-500 hover:bg-green-600">Paid</Badge>;
       case "Partial":
-        return <Badge className="bg-amber-500 hover:bg-amber-600">Partial</Badge>;
       case "Unpaid":
-        return <Badge variant="destructive">Unpaid</Badge>;
+        return <Badge variant="destructive">Pending</Badge>;
       default:
         return null;
     }
@@ -83,9 +80,9 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
             
             <div className="space-y-2 mt-2">
               {enrollment.payment === "Partial" && (
-                <div className="p-2 bg-amber-100 rounded-md text-amber-800 text-sm flex items-center">
-                  <Clock className="h-4 w-4 mr-2" /> 
-                  <span>Partial payment received. Remaining balance due.</span>
+                <div className="p-2 bg-red-100 rounded-md text-red-800 text-sm flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-2" /> 
+                  <span>Balance payment pending</span>
                 </div>
               )}
               
@@ -98,7 +95,7 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
                 <span className="font-medium mr-2">Payment Status:</span>
                 <div className="flex items-center">
                   {getPaymentIcon(enrollment.payment)}
-                  <span className="ml-1">{enrollment.payment}</span>
+                  <span className="ml-1">{enrollment.payment === "Paid" ? "Paid" : "Pending"}</span>
                 </div>
               </div>
             </div>
@@ -117,9 +114,8 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
               <Button 
                 size="sm"
                 onClick={() => onRecord(enrollment.id)}
-                className={enrollment.payment === "Partial" ? "bg-amber-500 hover:bg-amber-600" : ""}
               >
-                {enrollment.payment === "Partial" ? "Complete Payment" : "Record Payment"}
+                Record Payment
                 <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             )}

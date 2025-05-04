@@ -30,8 +30,7 @@ interface PaymentSummary {
   period: string;
   totalAmount: number;
   paidCount: number;
-  partialCount: number;
-  unpaidCount: number;
+  pendingCount: number;
 }
 
 // Payment record interface
@@ -149,24 +148,21 @@ const getPaymentSummaries = (): PaymentSummary[] => [
     period: "May 2025",
     totalAmount: 25600,
     paidCount: 24,
-    partialCount: 12,
-    unpaidCount: 18
+    pendingCount: 30
   },
   {
     id: "ps2",
     period: "April 2025",
     totalAmount: 32450,
     paidCount: 34,
-    partialCount: 15,
-    unpaidCount: 5
+    pendingCount: 20
   },
   {
     id: "ps3",
     period: "March 2025",
     totalAmount: 28900,
     paidCount: 30,
-    partialCount: 10,
-    unpaidCount: 2
+    pendingCount: 12
   }
 ];
 
@@ -244,11 +240,7 @@ export function CashierDashboard() {
           <div className="flex gap-2 text-sm">
             <div className="flex items-center mr-3">
               <div className="h-3 w-3 rounded-full bg-red-500 mr-1"></div>
-              <span>Unpaid</span>
-            </div>
-            <div className="flex items-center mr-3">
-              <div className="h-3 w-3 rounded-full bg-amber-500 mr-1"></div>
-              <span className="font-medium">Partial</span>
+              <span>Pending</span>
             </div>
             <div className="flex items-center">
               <div className="h-3 w-3 rounded-full bg-green-500 mr-1"></div>
@@ -282,8 +274,7 @@ export function CashierDashboard() {
                 <TableHead>Period</TableHead>
                 <TableHead>Total Amount</TableHead>
                 <TableHead>Paid</TableHead>
-                <TableHead>Partial</TableHead>
-                <TableHead>Unpaid</TableHead>
+                <TableHead>Pending</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -300,13 +291,8 @@ export function CashierDashboard() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800">
-                      {summary.partialCount}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
                     <Badge variant="outline" className="bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800">
-                      {summary.unpaidCount}
+                      {summary.pendingCount}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

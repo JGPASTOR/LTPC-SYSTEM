@@ -41,7 +41,7 @@ interface PaymentRecord {
   courseName: string;
   trainerName: string;
   status: "Active" | "Completed" | "Dropped";
-  payment: "Paid" | "Unpaid";
+  payment: "Paid" | "Pending";
   amountDue: number;
   amountPaid: number;
   balanceDue: number;
@@ -57,7 +57,7 @@ const getPaymentRecords = (): PaymentRecord[] => [
     courseName: "Welding Technology",
     trainerName: "Juan Dela Cruz",
     status: "Active",
-    payment: "Unpaid",
+    payment: "Pending",
     amountDue: 1500,
     amountPaid: 0,
     balanceDue: 1500
@@ -69,7 +69,7 @@ const getPaymentRecords = (): PaymentRecord[] => [
     courseName: "Food Processing",
     trainerName: "Maria Santos",
     status: "Active",
-    payment: "Unpaid",
+    payment: "Pending",
     amountDue: 1200,
     amountPaid: 0,
     balanceDue: 1200,
@@ -82,7 +82,7 @@ const getPaymentRecords = (): PaymentRecord[] => [
     courseName: "Automotive Servicing",
     trainerName: "Roberto Reyes",
     status: "Active",
-    payment: "Unpaid",
+    payment: "Pending",
     amountDue: 2000,
     amountPaid: 0,
     balanceDue: 2000
@@ -94,7 +94,7 @@ const getPaymentRecords = (): PaymentRecord[] => [
     courseName: "Electronics Servicing",
     trainerName: "Elena Gomez",
     status: "Active",
-    payment: "Unpaid",
+    payment: "Pending",
     amountDue: 1800,
     amountPaid: 0,
     balanceDue: 1800,

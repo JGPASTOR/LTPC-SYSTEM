@@ -22,7 +22,9 @@ import {
   TrendingUp,
   Users,
   GraduationCap,
-  Wallet
+  Wallet,
+  Clock as FileClock,
+  Receipt
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -320,31 +322,29 @@ export default function ReportsPage() {
             <Card>
               <CardHeader>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <CardTitle>Report Generator</CardTitle>
+                  <CardTitle>
+                    {user?.role === "cashier" ? "Payment Reports" : "Report Generator"}
+                  </CardTitle>
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="report-type">Report Type:</Label>
-                      <Select 
-                        value={reportType} 
-                        onValueChange={setReportType}
-                      >
-                        <SelectTrigger id="report-type" className="w-[180px]">
-                          <SelectValue placeholder="Select report" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {user?.role === "cashier" ? (
+                    {user?.role !== "cashier" && (
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="report-type">Report Type:</Label>
+                        <Select 
+                          value={reportType} 
+                          onValueChange={setReportType}
+                        >
+                          <SelectTrigger id="report-type" className="w-[180px]">
+                            <SelectValue placeholder="Select report" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="enrollment">Enrollment Report</SelectItem>
+                            <SelectItem value="completion">Completion Report</SelectItem>
                             <SelectItem value="payment">Payment Report</SelectItem>
-                          ) : (
-                            <>
-                              <SelectItem value="enrollment">Enrollment Report</SelectItem>
-                              <SelectItem value="completion">Completion Report</SelectItem>
-                              <SelectItem value="payment">Payment Report</SelectItem>
-                              <SelectItem value="employment">Employment Report</SelectItem>
-                            </>
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                            <SelectItem value="employment">Employment Report</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                     
                     <Popover>
                       <PopoverTrigger asChild>

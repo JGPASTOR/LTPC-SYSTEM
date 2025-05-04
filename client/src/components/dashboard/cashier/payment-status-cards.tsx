@@ -8,22 +8,30 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Wallet, AlertCircle, CheckCircle, ArrowRight, Clock } from "lucide-react";
 
-// Use the Enrollment type but we'll only use relevant fields
-import { Enrollment } from "@/components/enrollments/enrollment-table";
+// Define our own type for cashier view
+interface PaymentEnrollment {
+  id: string;
+  traineeName: string;
+  traineeInitials: string;
+  courseName: string;
+  trainerName: string;
+  payment: "Paid" | "Pending";
+  amountDue: number;
+}
 
 interface PaymentStatusCardsProps {
-  enrollments: Enrollment[];
+  enrollments: PaymentEnrollment[];
   onView: (id: string) => void;
   onRecord: (id: string) => void;
 }
 
 export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentStatusCardsProps) {
   // Get payment status indicator
-  const getPaymentIcon = (status: "Paid" | "Unpaid") => {
+  const getPaymentIcon = (status: "Paid" | "Pending") => {
     switch (status) {
       case "Paid":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case "Unpaid":
+      case "Pending":
         return <AlertCircle className="h-5 w-5 text-red-500" />;
       default:
         return null;
@@ -31,11 +39,11 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
   };
 
   // Get background color based on payment status
-  const getCardClassName = (status: "Paid" | "Unpaid") => {
+  const getCardClassName = (status: "Paid" | "Pending") => {
     switch (status) {
       case "Paid":
         return "border-green-200 bg-green-50";
-      case "Unpaid":
+      case "Pending":
         return "border-red-200 bg-red-50";
       default:
         return "";
@@ -43,11 +51,11 @@ export function PaymentStatusCards({ enrollments, onView, onRecord }: PaymentSta
   };
 
   // Get payment badge
-  const getPaymentBadge = (status: "Paid" | "Unpaid") => {
+  const getPaymentBadge = (status: "Paid" | "Pending") => {
     switch (status) {
       case "Paid":
         return <Badge className="bg-green-500 hover:bg-green-600">Paid</Badge>;
-      case "Unpaid":
+      case "Pending":
         return <Badge variant="destructive">Pending</Badge>;
       default:
         return null;

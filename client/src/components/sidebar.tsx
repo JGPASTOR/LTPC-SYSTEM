@@ -96,7 +96,6 @@ export function Sidebar() {
         {/* Cashier can access payments only */}
         {user?.role === "cashier" && (
           <>
-            <NavItem href="/trainees" icon={Users}>Trainees</NavItem>
             <NavItem href="/payments" icon={Wallet}>Payments</NavItem>
           </>
         )}

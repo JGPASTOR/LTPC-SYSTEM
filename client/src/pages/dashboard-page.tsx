@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 
 // Import role-specific dashboards
 import { AdminPesdoDashboard } from "@/components/dashboard/admin-pesdo/admin-pesdo-dashboard";

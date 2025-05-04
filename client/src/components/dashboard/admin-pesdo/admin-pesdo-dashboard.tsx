@@ -169,7 +169,16 @@ export function AdminPesdoDashboard() {
   const { toast } = useToast();
 
   // In a real app, these would be API queries
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats = {
+      totalEnrollments: 756,
+      activeCourses: 24,
+      completedTrainings: 189,
+      paymentCollection: "₱245,830",
+      activeTrainers: 12,
+      employmentReferrals: 45
+    }, 
+    isLoading: statsLoading 
+  } = useQuery({
     queryKey: ["/api/dashboard/admin/stats"],
     queryFn: () => ({
       totalEnrollments: 756,
@@ -213,7 +222,7 @@ export function AdminPesdoDashboard() {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <SummaryCards stats={stats || {}} isLoading={statsLoading} />
+      <SummaryCards stats={stats} isLoading={statsLoading} />
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">

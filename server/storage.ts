@@ -21,6 +21,8 @@ import connectPg from "connect-pg-simple";
 import { db } from "./db";
 import { pool } from "./db";
 import { eq, desc, and, isNotNull } from "drizzle-orm";
+import { promisify } from "util";
+import { scrypt, randomBytes } from "crypto";
 
 // For in-memory session store (used for development)
 const MemoryStore = createMemoryStore(session);
